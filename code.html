@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodGuard India | Food Adulteration Awareness</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#16a34a',
+                        primaryDark: '#15803d',
+                        warning: '#ea580c',
+                        danger: '#dc2626',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; scroll-behavior: smooth; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden-view { display: none !important; }
+        
+        @media screen {
+            .print-only { display: none !important; }
+        }
+        
+        @media print {
+            @page { margin: 1.5cm; }
+            body { background-color: #fff !important; color: #000 !important; }
+            
+            /* Hide UI elements not meant for print */
+            nav, footer, #view-home, #view-info, #view-complaint, #view-quiz, 
+            .no-print, form, .suggestion-chip { display: none !important; }
+            
+            /* Force show only print-friendly elements */
+            .print-only { display: block !important; }
+            #view-search { display: block !important; margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
+            
+            /* Strip ink-wasting colors, backgrounds, and shadows */
+            * { box-shadow: none !important; text-shadow: none !important; }
+            .bg-gray-50, .bg-blue-50, .bg-orange-50, .bg-red-50, .bg-green-50, .bg-white, .bg-gray-100, .bg-blue-100 { 
+                background-color: transparent !important; 
+                border-color: #e5e7eb !important; 
+            }
+            .rounded-xl, .rounded-lg, .rounded-md, .rounded-full { border-radius: 0 !important; }
+            .border-l-4 { border-left-color: #000 !important; border-width: 0 0 0 2px !important; padding-left: 1rem !important; }
+            .border, .border-b, .border-t { border-color: #000 !important; border-width: 1px !important; }
+            
+            /* Typography optimizations for B&W print */
+            .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-blue-800 { color: #000 !important; }
+            .text-warning, .text-danger, .text-primary, .text-blue-600 { color: #222 !important; font-weight: bold !important; }
+            
+            /* Convert Tailwind grids/lists to standard print lists */
+            ul.grid { display: block !important; margin-left: 1.5rem !important; list-style-type: disc !important; }
+            li { display: list-item !important; margin-bottom: 0.5rem !important; }
+            li i, li svg { display: none !important; } /* Hide the Lucide checkmarks in print */
+            
+            /* Page break management */
+            .page-break-avoid { page-break-inside: avoid; }
+            
+            /* Tighter spacing for print */
+            .p-6, .p-4, .p-3 { padding: 0.5rem 0 !important; }
+            .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem !important; }
+            .mb-2 { margin-bottom: 0.25rem !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center cursor-pointer" onclick="navigate('home')">
+                    <i data-lucide="shield-check" class="h-8 w-8 text-primary"></i>
+                    <span class="ml-2 text-xl font-bold text-gray-800">FoodGuard<span class="text-primary">India</span></span>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <button onclick="navigate('home')" class="text-gray-600 hover:text-primary font-medium" data-i18n="navHome">Home</button>
+                    <button onclick="navigate('search')" class="text-gray-600 hover:text-primary font-medium" data-i18n="navSearch">Check Product</button>
+                    <button onclick="navigate('info')" class="text-gray-600 hover:text-primary font-medium" data-i18n="navInfo">Food Info</button>
+                    <button onclick="navigate('quiz')" class="text-gray-600 hover:text-primary font-medium" data-i18n="navQuiz">Quiz</button>
+                    <button onclick="navigate('complaint')" class="bg-danger text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 transition" data-i18n="navComplaint">File a Complaint</button>
+                    
+                    <!-- Desktop Accessibility & Language Controls -->
+                    <div class="flex items-center space-x-1 ml-4 border-l pl-4 border-gray-200">
+                        <button onclick="adjustTextSize(-1)" data-i18n-title="btnTextDec" title="Decrease text size" aria-label="Decrease text size" class="text-gray-600 hover:text-primary font-bold text-sm px-2 py-1 rounded hover:bg-gray-100 transition">A-</button>
+                        <button onclick="adjustTextSize(1)" data-i18n-title="btnTextInc" title="Increase text size" aria-label="Increase text size" class="text-gray-600 hover:text-primary font-bold text-lg px-2 py-1 rounded hover:bg-gray-100 transition">A+</button>
+                    </div>
+                    <select onchange="applyLanguage(this.value)" class="ml-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2 outline-none cursor-pointer" id="lang-select-desktop">
+                        <option value="en">English</option>
+                        <option value="hi">हिन्दी (Hindi)</option>
+                        <option value="mr">मराठी (Marathi)</option>
+                    </select>
+                </div>
+                <div class="md:hidden flex items-center space-x-3">
+                    <!-- Mobile Accessibility & Language Controls -->
+                    <div class="flex items-center border-r pr-2 border-gray-200 space-x-1">
+                        <button onclick="adjustTextSize(-1)" data-i18n-title="btnTextDec" title="Decrease text size" aria-label="Decrease text size" class="text-gray-600 font-bold text-sm px-1">A-</button>
+                        <button onclick="adjustTextSize(1)" data-i18n-title="btnTextInc" title="Increase text size" aria-label="Increase text size" class="text-gray-600 font-bold text-lg px-1">A+</button>
+                    </div>
+                    <select onchange="applyLanguage(this.value)" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block p-1 outline-none cursor-pointer" id="lang-select-mobile">
+                        <option value="en">EN</option>
+                        <option value="hi">HI</option>
+                        <option value="mr">MR</option>
+                    </select>
+                    <button onclick="toggleMobileMenu()" class="text-gray-600" aria-expanded="false" aria-label="Toggle mobile menu">
+                        <i data-lucide="menu" class="h-6 w-6" id="mobile-menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-2 pt-2 pb-3 space-y-1 shadow-lg">
+            <button onclick="navigate('home')" class="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50" data-i18n="navHome">Home</button>
+            <button onclick="navigate('search')" class="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50" data-i18n="navSearch">Check Product</button>
+            <button onclick="navigate('info')" class="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50" data-i18n="navInfo">Food Info</button>
+            <button onclick="navigate('quiz')" class="block w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50" data-i18n="navQuiz">Quiz</button>
+            <button onclick="navigate('complaint')" class="block w-full text-left px-3 py-2 text-danger font-bold hover:bg-gray-50" data-i18n="navComplaint">File a Complaint</button>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        <div id="view-home" class="fade-in">
+            <div class="relative bg-gray-900 text-white py-20 px-4 text-center overflow-hidden">
+                <div class="absolute inset-0 opacity-60 bg-gradient-to-tr from-primaryDark via-gray-900 to-black"></div>
+                <div class="relative z-10 max-w-3xl mx-auto">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4" data-i18n="heroHeading">Is Your Food Really Safe?</h1>
+                    <p class="text-lg md:text-xl mb-8 text-gray-200" data-i18n="heroSub">Learn how to identify food adulteration, understand the risks, and take action to protect yourself and your family.</p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <button onclick="navigate('search')" class="bg-primary hover:bg-primaryDark text-white px-6 py-3 rounded-md font-semibold text-lg flex items-center justify-center transition shadow-lg">
+                            <i data-lucide="search" class="w-5 h-5 mr-2"></i> <span data-i18n="heroBtnSearch">Check a Food Product</span>
+                        </button>
+                        <button onclick="navigate('complaint')" class="bg-white text-gray-900 hover:bg-gray-100 px-6 py-3 rounded-md font-semibold text-lg flex items-center justify-center transition shadow-lg">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-danger"></i> <span data-i18n="heroBtnComplaint">File a Complaint</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 py-12">
+                <h2 class="text-2xl font-bold text-center mb-8 text-gray-800" data-i18n="glanceTitle">Food Safety at a Glance</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="text-primary mb-4"><i data-lucide="book-open" class="w-10 h-10"></i></div>
+                        <h3 class="font-bold text-xl mb-2" data-i18n="glanceCard1Title">Food Adulteration</h3>
+                        <p class="text-gray-600 mb-4" data-i18n="glanceCard1Sub">Understand what adulteration is and how it harms health.</p>
+                        <button onclick="navigate('info')" class="text-primary font-medium hover:underline" data-i18n="glanceCard1Btn">Learn More &rarr;</button>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="text-warning mb-4"><i data-lucide="shield-alert" class="w-10 h-10"></i></div>
+                        <h3 class="font-bold text-xl mb-2" data-i18n="glanceCard2Title">Prevention Tips</h3>
+                        <p class="text-gray-600 mb-4" data-i18n="glanceCard2Sub">Simple habits to ensure the food you buy is safe and authentic.</p>
+                        <button onclick="navigate('info')" class="text-warning font-medium hover:underline" data-i18n="glanceCard2Btn">View Tips &rarr;</button>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="text-blue-600 mb-4"><i data-lucide="help-circle" class="w-10 h-10"></i></div>
+                        <h3 class="font-bold text-xl mb-2" data-i18n="glanceCard3Title">Test Knowledge</h3>
+                        <p class="text-gray-600 mb-4" data-i18n="glanceCard3Sub">Take our quick quiz to see how much you know about food safety.</p>
+                        <button onclick="navigate('quiz')" class="text-blue-600 font-medium hover:underline" data-i18n="glanceCard3Btn">Take Quiz &rarr;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-search" class="hidden-view max-w-4xl mx-auto px-4 py-12 fade-in">
+            <h2 class="text-3xl font-bold mb-6 text-center text-gray-800 no-print" data-i18n="searchTitle">Search a Food Product</h2>
+            <form onsubmit="handleSearch(event)" class="relative mb-10 no-print">
+                <input 
+                    id="searchInput"
+                    type="text" 
+                    class="w-full p-4 pl-12 text-lg border-2 border-gray-200 rounded-xl focus:border-primary focus:ring-0 outline-none shadow-sm"
+                    placeholder="Enter product name..."
+                />
+                <i data-lucide="search" class="absolute left-4 top-4 h-6 w-6 text-gray-400"></i>
+                <button type="submit" class="absolute right-3 top-3 bg-primary text-white px-4 py-1.5 rounded-lg font-medium hover:bg-primaryDark transition" data-i18n="searchBtn">
+                    Search
+                </button>
+            </form>
+
+            <div id="searchResultContainer" class="mt-8 hidden"></div>
+        </div>
+
+        <div id="view-info" class="hidden-view max-w-5xl mx-auto px-4 py-12 fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-gray-800" data-i18n="infoTitle1">What is Food Adulteration?</h2>
+                <a href="#verify-guide" class="hidden sm:inline-block text-sm font-semibold text-primary hover:underline" data-i18n="jumpToVerify">Jump to Label Guide &darr;</a>
+            </div>
+            
+            <p class="text-lg text-gray-700 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary" data-i18n="infoDesc1">
+                Food adulteration means adding inferior, harmful, unwanted, or unauthorized substances to food, or removing valuable ingredients from food, in a way that reduces its quality or may make it unsafe.
+            </p>
+
+            <h3 class="text-2xl font-bold mt-12 mb-6 text-gray-800" data-i18n="infoTitle2">Protect Yourself: Prevention Tips</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-start">
+                    <i data-lucide="check-circle" class="w-6 h-6 text-primary shrink-0 mr-3 mt-0.5"></i>
+                    <span class="text-gray-700" data-i18n="infoTip1">Check packaging for tampering or damage</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-start">
+                    <i data-lucide="check-circle" class="w-6 h-6 text-primary shrink-0 mr-3 mt-0.5"></i>
+                    <span class="text-gray-700" data-i18n="infoTip2">Verify FSSAI license numbers and logos</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-start">
+                    <i data-lucide="check-circle" class="w-6 h-6 text-primary shrink-0 mr-3 mt-0.5"></i>
+                    <span class="text-gray-700" data-i18n="infoTip3">Always check manufacturing and expiry dates</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-start">
+                    <i data-lucide="check-circle" class="w-6 h-6 text-primary shrink-0 mr-3 mt-0.5"></i>
+                    <span class="text-gray-700" data-i18n="infoTip4">Buy from reliable, licensed sellers</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-start">
+                    <i data-lucide="check-circle" class="w-6 h-6 text-primary shrink-0 mr-3 mt-0.5"></i>
+                    <span class="text-gray-700" data-i18n="infoTip5">Avoid suspiciously cheap products without labels</span>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-start">
+                    <i data-lucide="check-circle" class="w-6 h-6 text-primary shrink-0 mr-3 mt-0.5"></i>
+                    <span class="text-gray-700" data-i18n="infoTip6">Keep purchase receipts/bills for future reference</span>
+                </div>
+            </div>
+
+            <!-- VERIFY BEFORE YOU BUY SECTION -->
+            <div id="verify-guide" class="mt-16 pt-12 border-t border-gray-200">
+                <h3 class="text-2xl font-bold mb-4 text-gray-800" data-i18n="verifyTitle">Verify Before You Buy: Package Label Guide</h3>
+                <p class="text-lg text-gray-700 mb-8" data-i18n="verifyIntro">Every legally sold packaged food in India must carry the FSSAI logo and a 14-digit license number. Checking this takes just a few seconds and should be your first step before buying.</p>
+
+                <div class="bg-gray-50 p-6 sm:p-10 rounded-xl mb-12 flex flex-col md:flex-row gap-8 items-center justify-center border border-gray-200 shadow-inner">
+                    
+                    <!-- HTML/CSS Mockup -->
+                    <div class="relative border-2 border-gray-300 p-6 rounded-lg bg-white w-full max-w-sm shadow-md">
+                        <div class="border-b-2 border-gray-100 pb-3 mb-5 text-center">
+                            <div class="text-lg font-bold text-gray-400 uppercase tracking-widest mb-2" data-i18n="mockupProduct">Standard Food Product</div>
+                            <div class="w-16 h-1 bg-gray-200 mx-auto rounded"></div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3 mb-5">
+                            <span class="bg-primary text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-xs shrink-0 shadow">1</span>
+                            <div class="border-2 border-orange-400 rounded-t-xl rounded-b-sm px-4 py-1 text-orange-500 font-black italic tracking-widest bg-orange-50" data-i18n="mockupFssai">fssai</div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3 mb-6">
+                            <span class="bg-primary text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-xs shrink-0 shadow">2</span>
+                            <div class="font-bold text-gray-800 tracking-wider text-sm" data-i18n="mockupLic">Lic. No. 12345678901234</div>
+                        </div>
+                        
+                        <hr class="my-4 border-gray-200 border-dashed" />
+                        
+                        <div class="flex items-center space-x-3 mb-3">
+                            <span class="bg-primary text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-xs shrink-0 shadow">3</span>
+                            <div class="font-medium text-gray-600 text-sm" data-i18n="mockupBatch">Batch No: B-2026X</div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <span class="bg-primary text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-xs shrink-0 shadow">4</span>
+                            <div class="font-medium text-gray-600 text-sm" data-i18n="mockupDate">Mfg: 12/2025 | Exp: 12/2026</div>
+                        </div>
+                    </div>
+
+                    <!-- Callout Legend -->
+                    <div class="w-full max-w-sm space-y-3">
+                        <div class="flex items-center bg-white p-3 rounded shadow-sm border border-gray-100">
+                            <span class="bg-primary text-white w-8 h-8 flex items-center justify-center rounded-full font-bold shadow-sm shrink-0 mr-3">1</span>
+                            <span class="font-medium text-gray-800" data-i18n="callout1">1. Official FSSAI Logo</span>
+                        </div>
+                        <div class="flex items-center bg-white p-3 rounded shadow-sm border border-gray-100">
+                            <span class="bg-primary text-white w-8 h-8 flex items-center justify-center rounded-full font-bold shadow-sm shrink-0 mr-3">2</span>
+                            <span class="font-medium text-gray-800" data-i18n="callout2">2. 14-Digit License Number</span>
+                        </div>
+                        <div class="flex items-center bg-white p-3 rounded shadow-sm border border-gray-100">
+                            <span class="bg-primary text-white w-8 h-8 flex items-center justify-center rounded-full font-bold shadow-sm shrink-0 mr-3">3</span>
+                            <span class="font-medium text-gray-800" data-i18n="callout3">3. Batch Number</span>
+                        </div>
+                        <div class="flex items-center bg-white p-3 rounded shadow-sm border border-gray-100">
+                            <span class="bg-primary text-white w-8 h-8 flex items-center justify-center rounded-full font-bold shadow-sm shrink-0 mr-3">4</span>
+                            <span class="font-medium text-gray-800" data-i18n="callout4">4. Mfg & Expiry Dates</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Online Verification Block -->
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm flex flex-col justify-center">
+                        <h4 class="font-bold text-xl mb-3 text-blue-900 flex items-center">
+                            <i data-lucide="shield-check" class="w-6 h-6 mr-2 text-blue-600"></i>
+                            <span data-i18n="verifyOnlineTitle">How to Verify Online</span>
+                        </h4>
+                        <p class="text-gray-700 mb-6" data-i18n="verifyOnlineDesc">You can check the 14-digit license number on the official FoSCoS portal to confirm it is real and active.</p>
+                        <a href="https://foscos.fssai.gov.in/" target="_blank" rel="noopener noreferrer" class="inline-block text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow transition" data-i18n="verifyOnlineBtn">
+                            Verify License at FoSCoS Portal &rarr;
+                        </a>
+                    </div>
+                    
+                    <!-- Red Flags Block -->
+                    <div class="bg-red-50 p-6 rounded-xl border border-red-100 shadow-sm">
+                        <h4 class="font-bold text-xl mb-4 text-red-900 flex items-center">
+                            <i data-lucide="alert-circle" class="w-6 h-6 mr-2 text-danger"></i>
+                            <span data-i18n="redFlagsTitle">Red Flags to Watch Out For</span>
+                        </h4>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i data-lucide="x" class="w-5 h-5 text-danger mr-2 shrink-0 mt-0.5"></i>
+                                <span class="text-gray-700 text-sm" data-i18n="redFlag1">Missing FSSAI logo or license number entirely.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="x" class="w-5 h-5 text-danger mr-2 shrink-0 mt-0.5"></i>
+                                <span class="text-gray-700 text-sm" data-i18n="redFlag2">License number is not exactly 14 digits.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="x" class="w-5 h-5 text-danger mr-2 shrink-0 mt-0.5"></i>
+                                <span class="text-gray-700 text-sm" data-i18n="redFlag3">License number or dates are blurry, hand-written, or pasted as a separate loose sticker.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="x" class="w-5 h-5 text-danger mr-2 shrink-0 mt-0.5"></i>
+                                <span class="text-gray-700 text-sm" data-i18n="redFlag4">Missing Batch Number or Manufacturing/Expiry dates.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-complaint" class="hidden-view max-w-4xl mx-auto px-4 py-12 fade-in">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-danger mb-4" data-i18n="complaintTitle">Report Food Adulteration</h2>
+                <p class="text-lg text-gray-700" data-i18n="complaintDesc">If you suspect that a food product is unsafe, adulterated, misbranded, or violates food-safety requirements, report it immediately to the official food-safety authority.</p>
+            </div>
+
+            <div class="bg-red-50 border border-red-200 p-6 rounded-xl text-center mb-10">
+                <h3 class="font-bold text-xl text-gray-900 mb-2" data-i18n="complaintBoxTitle">File an Official Complaint</h3>
+                <p class="text-gray-700 mb-6" data-i18n="complaintBoxDesc">This website is for awareness. Complaints must be submitted through the official FSSAI Food Safety Connect portal.</p>
+                <a href="https://foscos.fssai.gov.in/consumergrievance" target="_blank" rel="noopener noreferrer" class="inline-block bg-danger hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition" data-i18n="complaintBtn">
+                    Go to Official FSSAI Portal &rarr;
+                </a>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-6 text-gray-800" data-i18n="timelineTitle">Complaint Process Timeline</h3>
+            <div class="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-300 before:to-transparent">
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">1</div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-lg shadow-sm border border-gray-100"><p class="font-semibold text-gray-800" data-i18n="step1">Identify the Problem or Suspicious Product</p></div>
+                </div>
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">2</div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-lg shadow-sm border border-gray-100"><p class="font-semibold text-gray-800" data-i18n="step2">Preserve Product & Packaging (Do not throw it away)</p></div>
+                </div>
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">3</div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-lg shadow-sm border border-gray-100"><p class="font-semibold text-gray-800" data-i18n="step3">Collect Purchase Details (Bill, Shop Name, Date)</p></div>
+                </div>
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">4</div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-lg shadow-sm border border-gray-100"><p class="font-semibold text-gray-800" data-i18n="step4">Submit Complaint Through Official FSSAI Channel</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-quiz" class="hidden-view max-w-2xl mx-auto px-4 py-16 fade-in">
+            <div id="quiz-container" class="bg-white p-8 rounded-xl shadow-md border border-gray-100"></div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-900 text-gray-300 py-12 mt-12">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-primary mr-2"></i>
+                    FoodGuard India
+                </h3>
+                <p class="italic text-sm text-gray-400 mb-4" data-i18n="footerSlogan">"Know Your Food. Detect Adulteration. Stay Safe."</p>
+                <p class="text-sm" data-i18n="footerDesc">FoodGuard India is an educational awareness platform designed to help consumers understand food adulteration and find official reporting channels.</p>
+            </div>
+            <div>
+                <h4 class="text-lg font-bold text-white mb-4" data-i18n="footerLinksTitle">Quick Links</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><button onclick="navigate('home')" class="hover:text-primary" data-i18n="navHome">Home</button></li>
+                    <li><button onclick="navigate('search')" class="hover:text-primary" data-i18n="navSearch">Check Product</button></li>
+                    <li><button onclick="navigate('info')" class="hover:text-primary" data-i18n="navInfo">Food Info</button></li>
+                    <li><button onclick="navigate('complaint')" class="hover:text-primary" data-i18n="navComplaint">File a Complaint</button></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-bold text-white mb-4" data-i18n="footerDisclaimerTitle">Disclaimer</h4>
+                <p class="text-xs text-gray-400 leading-relaxed" data-i18n="footerDisclaimer">
+                    This website is intended for educational and public-awareness purposes only. Information presented here should not be treated as laboratory confirmation that a particular food product is adulterated. For complaints and regulatory action, users should use the official Government of India/FSSAI channels.
+                </p>
+            </div>
+        </div>
+        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
+            &copy; 2026 FoodGuard India Awareness Project. <span data-i18n="footerCopyright">Not an official government website.</span>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        
+        let currentLang = 'en';
+        let currentSearchResult = null;
+        let currentIsFuzzy = false;
+        let isQuizAnswered = false;
+        let currentSelectedAnswer = null;
+        let quizScore = 0;
+        
+        // Text Size Accessibility Logic
+        const fontSizes = ['14px', '16px', '18px', '20px', '22px'];
+        let currentFontSizeIndex = 1; // Default 16px
+        
+        function adjustTextSize(step) {
+            currentFontSizeIndex += step;
+            if (currentFontSizeIndex < 0) currentFontSizeIndex = 0;
+            if (currentFontSizeIndex >= fontSizes.length) currentFontSizeIndex = fontSizes.length - 1;
+            document.documentElement.style.fontSize = fontSizes[currentFontSizeIndex];
+        }
+
+        // Text-to-Speech (TTS) Logic
+        let isSpeaking = false;
+        let currentUtterance = null;
+        const ttsSupported = 'speechSynthesis' in window;
+
+        function stopTTS() {
+            if (ttsSupported && isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                resetTTSButtonUI();
+            }
+        }
+
+        function resetTTSButtonUI() {
+            const btnText = document.getElementById('tts-btn-text');
+            const btnIcon = document.getElementById('tts-btn-icon');
+            if (btnText && btnIcon) {
+                btnText.innerText = staticTranslations[currentLang].lblReadAloud;
+                btnIcon.setAttribute('data-lucide', 'volume-2');
+                lucide.createIcons();
+            }
+        }
+
+        function toggleTTS() {
+            if (!ttsSupported || !currentSearchResult) return;
+            const t = staticTranslations[currentLang];
+
+            if (isSpeaking) {
+                stopTTS();
+                return;
+            }
+
+            const textToRead = `${currentSearchResult.name[currentLang]}. ` +
+                               `${t.lblConcerns}. ${currentSearchResult.concerns[currentLang]}. ` +
+                               `${t.lblHealth}. ${currentSearchResult.health[currentLang]}. ` +
+                               `${t.lblChecks}. ${currentSearchResult.checks[currentLang]}.`;
+
+            currentUtterance = new SpeechSynthesisUtterance(textToRead);
+            
+            const langMap = { 'en': 'en-IN', 'hi': 'hi-IN', 'mr': 'mr-IN' };
+            currentUtterance.lang = langMap[currentLang] || 'en-US';
+
+            currentUtterance.onend = function() {
+                isSpeaking = false;
+                resetTTSButtonUI();
+            };
+            
+            currentUtterance.onerror = function() {
+                isSpeaking = false;
+                resetTTSButtonUI();
+            };
+
+            window.speechSynthesis.speak(currentUtterance);
+            isSpeaking = true;
+            
+            const btnText = document.getElementById('tts-btn-text');
+            const btnIcon = document.getElementById('tts-btn-icon');
+            if (btnText && btnIcon) {
+                btnText.innerText = t.lblStopReading;
+                btnIcon.setAttribute('data-lucide', 'square');
+                lucide.createIcons();
+            }
+        }
+
+        // Simple Levenshtein distance for fuzzy matching
+        function getEditDistance(a, b) {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+            for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) == a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1, 
+                            Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        const staticTranslations = {
+            en: {
+                navHome: "Home", navSearch: "Check Product", navInfo: "Food Info", navQuiz: "Quiz", navComplaint: "File a Complaint",
+                heroHeading: "Is Your Food Really Safe?",
+                heroSub: "Learn how to identify food adulteration, understand the risks, and take action to protect yourself and your family.",
+                heroBtnSearch: "Check a Food Product", heroBtnComplaint: "File a Complaint",
+                glanceTitle: "Food Safety at a Glance",
+                glanceCard1Title: "Food Adulteration", glanceCard1Sub: "Understand what adulteration is and how it harms health.", glanceCard1Btn: "Learn More \u2192",
+                glanceCard2Title: "Prevention Tips", glanceCard2Sub: "Simple habits to ensure the food you buy is safe and authentic.", glanceCard2Btn: "View Tips \u2192",
+                glanceCard3Title: "Test Knowledge", glanceCard3Sub: "Take our quick quiz to see how much you know about food safety.", glanceCard3Btn: "Take Quiz \u2192",
+                searchTitle: "Search a Food Product", searchPlaceholder: "Enter product name (e.g. Milk, Turmeric)...", searchBtn: "Search",
+                emptySearchTitle: "Please enter a product name", emptySearchDesc: "Enter a food product name to search our database.",
+                notFoundTitle: "Product Not Found", notFoundDesc: "We don't currently have detailed information for this product. Try selecting one of the available items below:",
+                lblConcerns: "Possible Adulteration Concerns", lblLookFor: "What to Look For", lblChecks: "Basic Consumer Check", 
+                lblHealth: "Potential Health Risks", btnPrint: "Print this check", lblPrintedOn: "Printed on",
+                lblVideoTitle: "See How It's Tested", lblVideoComingSoon: "Video demonstration coming soon", lblVideoDisclaimer: "Official demonstration video via FSSAI (Food Safety and Standards Authority of India)",
+                lblClosestMatch: "Showing results for '{P}' (closest match to your search)",
+                lblNote: "Note: Visual or household tests cannot conclusively prove adulteration. For confirmation, laboratory testing or official inspection may be required.", lblReport: "Report a Suspicious Product \u2192",
+                jumpToVerify: "Jump to Label Guide \u2193",
+                infoTitle1: "What is Food Adulteration?", infoDesc1: "Food adulteration means adding inferior, harmful, unwanted, or unauthorized substances to food, or removing valuable ingredients from food, in a way that reduces its quality or may make it unsafe.",
+                infoTitle2: "Protect Yourself: Prevention Tips",
+                infoTip1: "Check packaging for tampering or damage", infoTip2: "Verify FSSAI license numbers and logos", infoTip3: "Always check manufacturing and expiry dates", infoTip4: "Buy from reliable, licensed sellers", infoTip5: "Avoid suspiciously cheap products without labels", infoTip6: "Keep purchase receipts/bills for future reference",
+                verifyTitle: "Verify Before You Buy: Package Label Guide",
+                verifyIntro: "Every legally sold packaged food in India must carry the FSSAI logo and a 14-digit license number. Checking this takes just a few seconds and should be your first step before buying.",
+                mockupProduct: "Standard Food Product",
+                mockupFssai: "fssai",
+                mockupLic: "Lic No. 12345678901234",
+                mockupBatch: "Batch No: B-2026X",
+                mockupDate: "Mfg: 12/2025 | Exp: 12/2026",
+                callout1: "1. Official FSSAI Logo",
+                callout2: "2. 14-Digit License Number",
+                callout3: "3. Batch Number",
+                callout4: "4. Mfg & Expiry Dates",
+                verifyOnlineTitle: "How to Verify Online",
+                verifyOnlineDesc: "You can check the 14-digit license number on the official FoSCoS portal to confirm it is real and active.",
+                verifyOnlineBtn: "Verify License at FoSCoS Portal \u2192",
+                redFlagsTitle: "Red Flags to Watch Out For",
+                redFlag1: "Missing FSSAI logo or license number entirely.",
+                redFlag2: "License number is not exactly 14 digits.",
+                redFlag3: "License number or dates are blurry, hand-written, or pasted as a separate loose sticker.",
+                redFlag4: "Missing Batch Number or Manufacturing/Expiry dates.",
+                complaintTitle: "Report Food Adulteration", complaintDesc: "If you suspect that a food product is unsafe, adulterated, misbranded, or violates food-safety requirements, report it immediately to the official food-safety authority.",
+                complaintBoxTitle: "File an Official Complaint", complaintBoxDesc: "This website is for awareness. Complaints must be submitted through the official FSSAI Food Safety Connect portal.", complaintBtn: "Go to Official FSSAI Portal \u2192",
+                timelineTitle: "Complaint Process Timeline",
+                step1: "Identify the Problem or Suspicious Product", step2: "Preserve Product & Packaging (Do not throw it away)", step3: "Collect Purchase Details (Bill, Shop Name, Date)", step4: "Submit Complaint Through Official FSSAI Channel",
+                quizCompleted: "Quiz Completed!", quizCompletedSub: "Being aware is the first step to food safety.", quizBtnHome: "Back to Home", quizBtnRestart: "Restart Quiz",
+                quizQOf: "Question {X} of {Y}", quizCorrect: "✅ Correct!", quizIncorrect: "❌ Incorrect.", quizNextBtn: "Next Question",
+                footerSlogan: "\"Know Your Food. Detect Adulteration. Stay Safe.\"", footerDesc: "FoodGuard India is an educational awareness platform designed to help consumers understand food adulteration and find official reporting channels.",
+                footerLinksTitle: "Quick Links", footerDisclaimerTitle: "Disclaimer", footerDisclaimer: "This website is intended for educational and public-awareness purposes only. Information presented here should not be treated as laboratory confirmation that a particular food product is adulterated. For complaints and regulatory action, users should use the official Government of India/FSSAI channels.", footerCopyright: "Not an official government website.",
+                shareProductMsg: "Did you know {P} can be adulterated with {C}? Check how to test it at home: {L}",
+                shareQuizMsg: "I scored {S}/{T} on the FoodGuard India food safety quiz! Test yourself: {L}",
+                btnShare: "Share", lblReadAloud: "Read Aloud", lblStopReading: "Stop Reading",
+                btnTextDec: "Decrease text size", btnTextInc: "Increase text size"
+            },
+            hi: {
+                navHome: "होम", navSearch: "उत्पाद जांचें", navInfo: "खाद्य जानकारी", navQuiz: "क्विज़", navComplaint: "शिकायत दर्ज करें",
+                heroHeading: "क्या आपका भोजन सच में सुरक्षित है?",
+                heroSub: "जानें कि खाद्य मिलावट की पहचान कैसे करें, जोखिमों को समझें और अपने परिवार की सुरक्षा के लिए कदम उठाएं।",
+                heroBtnSearch: "खाद्य उत्पाद की जांच करें", heroBtnComplaint: "शिकायत दर्ज करें",
+                glanceTitle: "एक नज़र में खाद्य सुरक्षा",
+                glanceCard1Title: "खाद्य मिलावट", glanceCard1Sub: "समझें कि मिलावट क्या है और यह स्वास्थ्य को कैसे नुकसान पहुंचाती है।", glanceCard1Btn: "और जानें \u2192",
+                glanceCard2Title: "बचाव के सुझाव", glanceCard2Sub: "यह सुनिश्चित करने के लिए सरल आदतें कि आप जो भोजन खरीदते हैं वह सुरक्षित है।", glanceCard2Btn: "सुझाव देखें \u2192",
+                glanceCard3Title: "ज्ञान परखें", glanceCard3Sub: "खाद्य सुरक्षा के बारे में आप कितना जानते हैं, यह देखने के लिए हमारी क्विज़ लें।", glanceCard3Btn: "क्विज़ लें \u2192",
+                searchTitle: "एक खाद्य उत्पाद खोजें", searchPlaceholder: "उत्पाद का नाम दर्ज करें (जैसे दूध, हल्दी)...", searchBtn: "खोजें",
+                emptySearchTitle: "कृपया उत्पाद का नाम दर्ज करें", emptySearchDesc: "हमारे डेटाबेस को खोजने के लिए एक खाद्य उत्पाद का नाम दर्ज करें।",
+                notFoundTitle: "उत्पाद नहीं मिला", notFoundDesc: "वर्तमान में हमारे पास इस उत्पाद के लिए विस्तृत जानकारी नहीं है। नीचे उपलब्ध वस्तुओं में से किसी एक को चुनने का प्रयास करें:",
+                lblConcerns: "संभावित मिलावट की चिंताएं", lblLookFor: "क्या जांचें", lblChecks: "बुनियादी उपभोक्ता जांच", 
+                lblHealth: "संभावित स्वास्थ्य जोखिम", btnPrint: "यह जांच प्रिंट करें", lblPrintedOn: "प्रिंट किया गया",
+                lblVideoTitle: "देखें इसका परीक्षण कैसे किया जाता है", lblVideoComingSoon: "वीडियो प्रदर्शन जल्द आ रहा है", lblVideoDisclaimer: "FSSAI (भारतीय खाद्य सुरक्षा और मानक प्राधिकरण) के माध्यम से आधिकारिक प्रदर्शन वीडियो",
+                lblClosestMatch: "'{P}' के लिए परिणाम दिखा रहा है (आपकी खोज से निकटतम मिलान)",
+                lblNote: "नोट: दृश्य या घरेलू परीक्षण मिलावट को निर्णायक रूप से साबित नहीं कर सकते। पुष्टि के लिए प्रयोगशाला परीक्षण या आधिकारिक निरीक्षण की आवश्यकता हो सकती है।", lblReport: "संदिग्ध उत्पाद की रिपोर्ट करें \u2192",
+                jumpToVerify: "लेबल गाइड पर जाएं \u2193",
+                infoTitle1: "खाद्य मिलावट क्या है?", infoDesc1: "खाद्य मिलावट का अर्थ है भोजन में घटिया, हानिकारक, अवांछित या अनधिकृत पदार्थों को मिलाना, या भोजन से मूल्यवान अवयवों को इस तरह से निकालना जिससे जिसके कारण इसकी गुणवत्ता कम हो जाती है या यह असुरक्षित हो जाता है।",
+                infoTitle2: "स्वयं को सुरक्षित रखें: बचाव के सुझाव",
+                infoTip1: "छेड़छाड़ या क्षति के लिए पैकेजिंग की जाँच करें", infoTip2: "FSSAI लाइसेंस नंबर और लोगो को सत्यापित करें", infoTip3: "हमेशा निर्माण और समाप्ति तिथि की जांच करें", infoTip4: "विश्वसनीय, लाइसेंस प्राप्त विक्रेताओं से खरीदें", infoTip5: "बिना लेबल वाले संदिग्ध रूप से सस्ते उत्पादों से बचें", infoTip6: "भविष्य के संदर्भ के लिए खरीद रसीद/बिल संभाल कर रखें",
+                verifyTitle: "खरीदने से पहले सत्यापित करें: पैकेज लेबल गाइड",
+                verifyIntro: "भारत में कानूनी रूप से बेचे जाने वाले हर पैक किए गए भोजन पर FSSAI लोगो और 14-अंकीय लाइसेंस नंबर होना चाहिए। इसे जांचने में बस कुछ सेकंड लगते हैं और यह खरीदने से पहले आपका पहला कदम होना चाहिए।",
+                mockupProduct: "मानक खाद्य उत्पाद",
+                mockupFssai: "fssai",
+                mockupLic: "Lic No. 12345678901234",
+                mockupBatch: "बैच नंबर: B-2026X",
+                mockupDate: "निर्माण: 12/2025 | समाप्ति: 12/2026",
+                callout1: "1. आधिकारिक FSSAI लोगो",
+                callout2: "2. 14-अंकीय लाइसेंस नंबर",
+                callout3: "3. बैच नंबर",
+                callout4: "4. निर्माण और समाप्ति तिथियां",
+                verifyOnlineTitle: "ऑनलाइन सत्यापन कैसे करें",
+                verifyOnlineDesc: "आप यह पुष्टि करने के लिए आधिकारिक FoSCoS पोर्टल पर 14-अंकीय लाइसेंस नंबर की जांच कर सकते हैं कि यह वास्तविक और सक्रिय है।",
+                verifyOnlineBtn: "FoSCoS पोर्टल पर लाइसेंस सत्यापित करें \u2192",
+                redFlagsTitle: "खतरे के संकेत (रेड फ्लैग्स)",
+                redFlag1: "FSSAI लोगो या लाइसेंस नंबर पूरी तरह से गायब होना।",
+                redFlag2: "लाइसेंस नंबर ठीक 14 अंकों का न होना।",
+                redFlag3: "लाइसेंस नंबर या तिथियां धुंधली, हाथ से लिखी हुई, या एक अलग ढीले स्टिकर के रूप में चिपकाई गई हों।",
+                redFlag4: "बैच नंबर या निर्माण/समाप्ति तिथियों का गायब होना।",
+                complaintTitle: "खाद्य मिलावट की रिपोर्ट करें", complaintDesc: "यदि आपको संदेह है कि कोई खाद्य उत्पाद असुरक्षित है, मिलावटी है, गलत ब्रांडेड है, या सुरक्षा आवश्यकताओं का उल्लंघन करता है, तो तुरंत आधिकारिक खाद्य सुरक्षा प्राधिकरण को रिपोर्ट करें।",
+                complaintBoxTitle: "आधिकारिक शिकायत दर्ज करें", complaintBoxDesc: "यह वेबसाइट जागरूकता के लिए है। शिकायतें आधिकारिक FSSAI 'फ़ूड सेफ़्टी कनेक्ट' पोर्टल के माध्यम से प्रस्तुत की जानी चाहिए।", complaintBtn: "आधिकारिक FSSAI पोर्टल पर जाएं \u2192",
+                timelineTitle: "शिकायत प्रक्रिया की समयरेखा",
+                step1: "समस्या या संदिग्ध उत्पाद की पहचान करें", step2: "उत्पाद और पैकेजिंग को सुरक्षित रखें (इसे फेंके नहीं)", step3: "खरीद विवरण एकत्र करें (बिल, दुकान का नाम, तिथि)", step4: "आधिकारिक FSSAI चैनल के माध्यम से शिकायत दर्ज करें",
+                quizCompleted: "क्विज़ पूरी हुई!", quizCompletedSub: "जागरूक होना खाद्य सुरक्षा की दिशा में पहला कदम है।", quizBtnHome: "होम पर वापस जाएँ", quizBtnRestart: "क्विज़ फिर से शुरू करें",
+                quizQOf: "प्रश्न {X} / {Y}", quizCorrect: "✅ सही!", quizIncorrect: "❌ गलत।", quizNextBtn: "अगला प्रश्न",
+                footerSlogan: "\"अपना भोजन जानें। मिलावट पहचानें। सुरक्षित रहें।\"", footerDesc: "फूडगार्ड इंडिया एक शैक्षिक जागरूकता मंच है जिसे उपभोक्ताओं को खाद्य मिलावट को समझने और आधिकारिक रिपोर्टिंग चैनल खोजने में मदद करने के लिए डिज़ाइन किया गया है।",
+                footerLinksTitle: "त्वरित लिंक", footerDisclaimerTitle: "अस्वीकरण", footerDisclaimer: "यह वेबसाइट केवल शैक्षिक और जन-जागरूकता उद्देश्यों के लिए है। यहां प्रस्तुत जानकारी को प्रयोगशाला की पुष्टि नहीं माना जाना चाहिए। शिकायतों और नियामक कार्रवाई के लिए, उपयोगकर्ताओं को भारत सरकार/FSSAI चैनलों का उपयोग करना चाहिए।", footerCopyright: "आधिकारिक सरकारी वेबसाइट नहीं है।",
+                shareProductMsg: "क्या आप जानते हैं कि {P} में {C} की मिलावट हो सकती है? घर पर इसकी जांच करने का तरीका देखें: {L}",
+                shareQuizMsg: "मैंने फूडगार्ड इंडिया खाद्य सुरक्षा क्विज़ में {T} में से {S} अंक प्राप्त किए हैं! खुद को परखें: {L}",
+                btnShare: "शेयर करें", lblReadAloud: "पढ़कर सुनाएं", lblStopReading: "पढ़ना रोकें",
+                btnTextDec: "टेक्स्ट का आकार घटाएं", btnTextInc: "टेक्स्ट का आकार बढ़ाएं"
+            },
+            mr: {
+                navHome: "मुख्यपृष्ठ", navSearch: "उत्पादन तपासा", navInfo: "अन्न माहिती", navQuiz: "प्रश्नमंजुषा", navComplaint: "तक्रार नोंदवा",
+                heroHeading: "तुमचे अन्न खरोखर सुरक्षित आहे का?",
+                heroSub: "अन्नातील भेसळ कशी ओळखायची ते जाणून घ्या, धोके समजून घ्या आणि स्वतःचे आणि कुटुंबाचे रक्षण करण्यासाठी पावले उचला.",
+                heroBtnSearch: "अन्न उत्पादन तपासा", heroBtnComplaint: "तक्रार नोंदवा",
+                glanceTitle: "अन्न सुरक्षा एका दृष्टीक्षेपात",
+                glanceCard1Title: "अन्नातील भेसळ", glanceCard1Sub: "भेसळ म्हणजे काय आणि ती आरोग्याला कशी हानी पोहोचवते ते समजून घ्या.", glanceCard1Btn: "अधिक जाणून घ्या \u2192",
+                glanceCard2Title: "प्रतिबंधात्मक टिप्स", glanceCard2Sub: "तुम्ही विकत घेतलेले अन्न सुरक्षित आहे याची खात्री करण्यासाठी सोप्या सवयी.", glanceCard2Btn: "टिप्स पहा \u2192",
+                glanceCard3Title: "ज्ञान तपासा", glanceCard3Sub: "तुम्हाला अन्न सुरक्षेबद्दल किती माहिती आहे हे पाहण्यासाठी आमची छोटी प्रश्नमंजुषा सोडवा.", glanceCard3Btn: "प्रश्नमंजुषा सोडवा \u2192",
+                searchTitle: "अन्न उत्पादन शोधा", searchPlaceholder: "उत्पादनाचे नाव प्रविष्ट करा (उदा. दूध, हळद)...", searchBtn: "शोधा",
+                emptySearchTitle: "कृपया उत्पादनाचे नाव प्रविष्ट करा", emptySearchDesc: "आमच्या डेटाबेसमध्ये शोधण्यासाठी अन्न उत्पादनाचे नाव प्रविष्ट करा.",
+                notFoundTitle: "उत्पादन सापडले नाही", notFoundDesc: "सध्या आमच्याकडे या उत्पादनाची सविस्तर माहिती नाही. खाली उपलब्ध असलेल्या पर्यायांपैकी एक निवडण्याचा प्रयत्न करा:",
+                lblConcerns: "संभाव्य भेसळीच्या चिंता", lblLookFor: "काय तपासावे", lblChecks: "प्राथमिक ग्राहक तपासणी", 
+                lblHealth: "संभाव्य आरोग्यावरील धोके", btnPrint: "ही तपासणी प्रिंट करा", lblPrintedOn: "प्रिंट केले",
+                lblVideoTitle: "याची चाचणी कशी केली जाते ते पहा", lblVideoComingSoon: "व्हिडिओ प्रात्यक्षिक लवकरच येत आहे", lblVideoDisclaimer: "FSSAI (भारतीय अन्न सुरक्षा आणि मानके प्राधिकरण) द्वारे अधिकृत प्रात्यक्षिक व्हिडिओ",
+                lblClosestMatch: "'{P}' साठी निकाल दर्शवित आहे (तुमच्या शोधाशी सर्वात जवळचा जुळणारा)",
+                lblNote: "टीप: दृश्य किंवा घरगुती चाचण्या भेसळ निर्णायकपणे सिद्ध करू शकत नाहीत. पुष्टीकरणासाठी प्रयोगशाळेतील चाचणी आवश्यक असू शकते.", lblReport: "संशयास्पद उत्पादनाची तक्रार करा \u2192",
+                jumpToVerify: "लेबल गाइडवर जा \u2193",
+                infoTitle1: "अन्नातील भेसळ म्हणजे काय?", infoDesc1: "अन्नातील भेसळ म्हणजे अन्नामध्ये हलक्या दर्जाचे, हानिकारक किंवा अनधिकृत पदार्थ मिसळणे, किंवा अन्नाची गुणवत्ता कमी होईल अशा प्रकारे त्यातील मौल्यवान घटक काढून टाकणे.",
+                infoTitle2: "स्वतःचे संरक्षण करा: प्रतिबंधात्मक टिप्स",
+                infoTip1: "पॅकेजिंग छेडछाड किंवा खराब झाले आहे का ते तपासा", infoTip2: "FSSAI परवाना क्रमांक आणि लोगो सत्यापित करा", infoTip3: "नेहमी उत्पादन आणि समाप्ती तारीख (Expiry Date) तपासा", infoTip4: "विश्वसनीय, परवानाधारक विक्रेत्यांकडूनच खरेदी करा", infoTip5: "लेबल नसलेली संशयास्पद स्वस्त उत्पादने टाळा", infoTip6: "भविष्यातील संदर्भासाठी खरेदीच्या पावत्या/बिले जपून ठेवा",
+                verifyTitle: "खरेदी करण्यापूर्वी सत्यापित करा: पॅकेज लेबल मार्गदर्शक",
+                verifyIntro: "भारतात कायदेशीररीत्या विकल्या जाणाऱ्या प्रत्येक पॅक केलेल्या अन्नावर FSSAI लोगो आणि १४-अंकी परवाना क्रमांक असणे अनिवार्य आहे. हे तपासण्यासाठी फक्त काही सेकंद लागतात आणि खरेदी करण्यापूर्वी ही तुमची पहिली पायरी असावी.",
+                mockupProduct: "प्रमाणित अन्न उत्पादन",
+                mockupFssai: "fssai",
+                mockupLic: "Lic No. 12345678901234",
+                mockupBatch: "बॅच क्र.: B-2026X",
+                mockupDate: "उत्पादन: 12/2025 | समाप्ती: 12/2026",
+                callout1: "1. अधिकृत FSSAI लोगो",
+                callout2: "2. १४-अंकी परवाना क्रमांक",
+                callout3: "3. बॅच क्रमांक",
+                callout4: "4. उत्पादन आणि समाप्ती तारखा",
+                verifyOnlineTitle: "ऑनलाइन पडताळणी कशी करावी",
+                verifyOnlineDesc: "परवाना वास्तविक आणि सक्रिय आहे याची खात्री करण्यासाठी तुम्ही अधिकृत FoSCoS पोर्टलवर १४-अंकी परवाना क्रमांक तपासू शकता.",
+                verifyOnlineBtn: "FoSCoS पोर्टलवर परवाना सत्यापित करा \u2192",
+                redFlagsTitle: "धोक्याचे संकेत (रेड फ्लॅग्स)",
+                redFlag1: "FSSAI लोगो किंवा परवाना क्रमांक पूर्णपणे गहाळ असणे.",
+                redFlag2: "परवाना क्रमांक बरोबर १४ अंकी नसणे.",
+                redFlag3: "परवाना क्रमांक किंवा तारखा अस्पष्ट, हाताने लिहिलेल्या, किंवा वेगळ्या स्टिकरवर चिकटवलेल्या असणे.",
+                redFlag4: "बॅच क्रमांक किंवा उत्पादन/समाप्ती तारखा नसणे.",
+                complaintTitle: "अन्नातील भेसळीची तक्रार करा", complaintDesc: "जर तुम्हाला एखादे अन्न उत्पादन असुरक्षित, भेसळयुक्त किंवा सुरक्षा नियमांचे उल्लंघन करणारे वाटत असेल, तर त्वरित अधिकृत अन्न सुरक्षा प्राधिकरणाला कळवा.",
+                complaintBoxTitle: "अधिकृत तक्रार नोंदवा", complaintBoxDesc: "ही वेबसाईट फक्त जागरूकतेसाठी आहे. अधिकृत FSSAI 'फूड सेफ्टी कनेक्ट' पोर्टलद्वारे तक्रारी सादर करणे आवश्यक आहे.", complaintBtn: "अधिकृत FSSAI पोर्टलवर जा \u2192",
+                timelineTitle: "तक्रार प्रक्रियेची वेळरेखा",
+                step1: "समस्या किंवा संशयास्पद उत्पादन ओळखा", step2: "उत्पादन आणि पॅकेजिंग सुरक्षित ठेवा (ते फेकून देऊ नका)", step3: "खरेदीचा तपशील गोळा करा (बिल, दुकानाचे नाव, तारीख)", step4: "अधिकृत FSSAI चॅनेलद्वारे तक्रार सबमिट करा",
+                quizCompleted: "प्रश्नमंजुषा पूर्ण झाली!", quizCompletedSub: "जागरूक असणे ही अन्न सुरक्षेची पहिली पायरी आहे.", quizBtnHome: "मुख्यपृष्ठावर परत जा", quizBtnRestart: "प्रश्नमंजुषा पुन्हा सुरू करा",
+                quizQOf: "प्रश्न {X} / {Y}", quizCorrect: "✅ बरोबर!", quizIncorrect: "❌ चूक.", quizNextBtn: "पुढचा प्रश्न",
+                footerSlogan: "\"तुमचे अन्न जाणून घ्या. भेसळ ओळखा. सुरक्षित राहा.\"", footerDesc: "फूडगार्ड इंडिया हे ग्राहकांना अन्नातील भेसळ समजून घेण्यासाठी आणि अधिकृत तक्रार चॅनेल शोधण्यात मदत करण्यासाठी डिझाइन केलेले शैक्षणिक जागरूकता व्यासपीठ आहे.",
+                footerLinksTitle: "क्विक लिंक्स", footerDisclaimerTitle: "अस्वीकरण", footerDisclaimer: "ही वेबसाईट केवळ शैक्षणिक आणि जन-जागरूकतेच्या उद्देशाने आहे. येथे दिलेली माहिती प्रयोगशाळेची पुष्टी मानली जाऊ नये. तक्रारी आणि कायदेशीर कारवाईसाठी भारताच्या अधिकृत FSSAI चॅनेलचा वापर करावा.", footerCopyright: "अधिकृत सरकारी वेबसाईट नाही.",
+                shareProductMsg: "तुम्हाला माहिती आहे का की {P} मध्ये {C} ची भेसळ असू शकते? घरी याची चाचणी कशी करायची ते पहा: {L}",
+                shareQuizMsg: "मी फूडगार्ड इंडिया अन्न सुरक्षा प्रश्नमंजुषेत {T} पैकी {S} गुण मिळवले आहेत! तुमचीही चाचणी घ्या: {L}",
+                btnShare: "शेअर करा", lblReadAloud: "वाचून दाखवा", lblStopReading: "वाचणे थांबवा",
+                btnTextDec: "मजकुराचा आकार कमी करा", btnTextInc: "मजकुराचा आकार वाढवा"
+            }
+        };
+
+        const productDatabase = [
+            {
+                name: { en: 'Milk', hi: 'दूध', mr: 'दूध' },
+                aliases: ['doodh', 'dudh'],
+                category: { en: 'Dairy', hi: 'डेयरी', mr: 'डेअरी' },
+                concerns: { en: 'Water, Starch, Detergents, Urea', hi: 'पानी, स्टार्च, डिटर्जेंट, यूरिया', mr: 'पाणी, स्टार्च, डिटर्जंट, युरिया' },
+                checks: { en: 'Put a drop of milk on a polished slanted surface. Pure milk leaves a white trail; adulterated milk flows immediately without a mark.', hi: 'पॉलिश की गई तिरछी सतह पर दूध की एक बूंद डालें। शुद्ध दूध सफेद निशान छोड़ता है; मिलावटी दूध बिना निशान छोड़े तुरंत बह जाता है।', mr: 'पॉलिश केलेल्या तिरप्या पृष्ठभागावर दुधाचा एक थेंब टाका. शुद्ध दूध पांढरी खूण सोडते; भेसळयुक्त दूध खूण न सोडता लगेच वाहून जाते.' },
+                health: { en: 'Stomach infections, kidney issues (if urea is present), and severe nutritional deficiency.', hi: 'पेट में संक्रमण, गुर्दे की समस्याएं (यदि यूरिया मौजूद है), और गंभीर पोषण संबंधी कमी।', mr: 'पोटाचे संक्रमण, किडनीच्या समस्या (युरिया असल्यास), आणि गंभीर पौष्टिकतेची कमतरता.' },
+                lookFor: { en: ['Proper packaging', 'FSSAI details', 'Batch number', 'Expiry date'], hi: ['उचित पैकेजिंग', 'FSSAI विवरण', 'बैच नंबर', 'समाप्ति तिथि'], mr: ['योग्य पॅकेजिंग', 'FSSAI तपशील', 'बॅच क्रमांक', 'समाप्ती तारीख'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Turmeric Powder', hi: 'हल्दी पाउडर', mr: 'हळद पावडर' },
+                aliases: ['haldi', 'tumeric', 'turmaric'],
+                category: { en: 'Spices', hi: 'मसाले', mr: 'मसाले' },
+                concerns: { en: 'Metanil Yellow (Artificial colour), Chalk powder', hi: 'मेटानिल येलो (कृत्रिम रंग), चाक पाउडर', mr: 'मेटानिल येलो (कृत्रिम रंग), खडूची पावडर' },
+                checks: { en: 'Add a teaspoon of turmeric to a glass of water. Natural turmeric settles down leaving clear water, while adulterated turmeric turns the water bright yellow.', hi: 'एक गिलास पानी में एक चम्मच हल्दी डालें। प्राकृतिक हल्दी साफ पानी छोड़कर नीचे बैठ जाती है, जबकि मिलावटी हल्दी पानी को चमकीला पीला कर देती है।', mr: 'एका ग्लास पाण्यात एक चमचा हळद टाका. नैसर्गिक हळद तळाशी बसते आणि पाणी स्वच्छ राहते, तर भेसळयुक्त हळद पाण्याला गडद पिवळे करते.' },
+                health: { en: 'Long-term consumption of Metanil yellow is highly carcinogenic and causes stomach disorders.', hi: 'मेटानिल येलो का लंबे समय तक सेवन अत्यधिक कैंसरकारी है और पेट की बीमारियों का कारण बनता है।', mr: 'मेटानिल येलोचे दीर्घकाळ सेवन अत्यंत कर्करोगजन्य आहे आणि त्यामुळे पोटाचे आजार होतात.' },
+                lookFor: { en: ['Proper packaging', 'Ingredient information', 'FSSAI details'], hi: ['उचित पैकेजिंग', 'सामग्री की जानकारी', 'FSSAI विवरण'], mr: ['योग्य पॅकेजिंग', 'घटकांची माहिती', 'FSSAI तपशील'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Honey', hi: 'शहद', mr: 'मध' },
+                aliases: ['madh', 'shahed', 'shahad'],
+                category: { en: 'Sweets', hi: 'मिठाई', mr: 'गोड पदार्थ' },
+                concerns: { en: 'Sugar syrups, Corn syrup, Jaggery', hi: 'चीनी की चाशनी, कॉर्न सिरप, गुड़', mr: 'साखरेचा पाक, कॉर्न सिरप, गूळ' },
+                checks: { en: 'Cotton wick test: Dip a cotton wick in honey and light it. Pure honey burns readily. If it crackles, water may be added.', hi: 'कॉटन विक टेस्ट: एक सूती बत्ती को शहद में डुबोएं और जलाएं। शुद्ध शहद आसानी से जलता है। यदि यह चटकता है, तो इसमें पानी मिला हो सकता है।', mr: 'कापसाच्या वातीची चाचणी: कापसाची वात मधात बुडवा आणि पेटवा. शुद्ध मध सहज जळते. जर ते तडतडले तर त्यात पाणी मिसळलेले असू शकते.' },
+                health: { en: 'Blood sugar spikes, obesity, and loss of the natural immunity-boosting properties.', hi: 'रक्त शर्करा (ब्लड शुगर) में वृद्धि, मोटापा, और प्राकृतिक प्रतिरक्षा बढ़ाने वाले गुणों का नुकसान।', mr: 'रक्तातील साखर (ब्लड शुगर) वाढणे, लठ्ठपणा, आणि नैसर्गिक रोगप्रतिकारक शक्ती कमी होणे.' },
+                lookFor: { en: ['FSSAI certification', 'Brand reputation'], hi: ['FSSAI प्रमाणन', 'ब्रांड की प्रतिष्ठा'], mr: ['FSSAI प्रमाणपत्र', 'ब्रँडची प्रतिष्ठा'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Paneer', hi: 'पनीर', mr: 'पनीर' },
+                aliases: ['cottage cheese'],
+                category: { en: 'Dairy', hi: 'डेयरी', mr: 'डेअरी' },
+                concerns: { en: 'Starch, Detergent, Urea, Synthetic Milk', hi: 'स्टार्च, डिटर्जेंट, यूरिया, सिंथेटिक दूध', mr: 'स्टार्च, डिटर्जंट, युरिया, सिंथेटिक दूध' },
+                checks: { en: 'Boil a small piece in water, cool it, and add a few drops of iodine solution. If it turns blue, starch is present.', hi: 'पानी में एक छोटा टुकड़ा उबालें, इसे ठंडा करें, और आयोडीन समाधान की कुछ बूंदें डालें। यदि यह नीला हो जाता है, तो स्टार्च मौजूद है।', mr: 'पाण्यात एक लहान तुकडा उकळवा, तो थंड करा आणि आयोडीन द्रावणाचे काही थेंब घाला. जर ते निळे झाले तर त्यात स्टार्च आहे.' },
+                health: { en: 'Severe stomach issues, kidney/liver strain, and loss of actual nutritional value.', hi: 'पेट की गंभीर समस्याएं, गुर्दे/लिवर पर दबाव, और वास्तविक पोषण मूल्य की हानि।', mr: 'पोटाच्या गंभीर समस्या, किडनी/यकृतावर ताण, आणि वास्तविक पौष्टिक मूल्याचे नुकसान.' },
+                lookFor: { en: ['FSSAI License', 'Manufacturing date', 'Store temperature'], hi: ['FSSAI लाइसेंस', 'निर्माण की तारीख', 'स्टोर का तापमान'], mr: ['FSSAI परवाना', 'उत्पादन तारीख', 'स्टोअरचे तापमान'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Ghee', hi: 'घी', mr: 'तूप' },
+                aliases: ['clarified butter', 'tup'],
+                category: { en: 'Dairy/Fats', hi: 'डेयरी/वसा', mr: 'डेअरी/स्निग्ध पदार्थ' },
+                concerns: { en: 'Mashed potatoes, Vanaspati (Hydrogenated oils), Animal fat', hi: 'उबले हुए आलू, वनस्पति (हाइड्रोजनीकृत तेल), पशु वसा', mr: 'उकडलेले बटाटे, वनस्पती तूप, प्राण्यांची चरबी' },
+                checks: { en: 'Melt a small amount and add an equal volume of concentrated HCl and a pinch of sugar. A pink or red color indicates vanaspati.', hi: 'थोड़ी मात्रा में पिघलाएं और समान मात्रा में केंद्रित HCl और चुटकी भर चीनी मिलाएं। गुलाबी या लाल रंग वनस्पति को इंगित करता है।', mr: 'थोडे तूप वितळवा आणि त्यात समान प्रमाणात केंद्रित HCl आणि चिमूटभर साखर घाला. गुलाबी किंवा लाल रंग वनस्पती तूप दर्शवितो.' },
+                health: { en: 'Increased cholesterol levels, heart diseases, and metabolic disorders.', hi: 'कोलेस्ट्रॉल के स्तर में वृद्धि, हृदय रोग, और चयापचय संबंधी विकार।', mr: 'कोलेस्ट्रॉलची वाढलेली पातळी, हृदयविकार, आणि चयापचय विकार.' },
+                lookFor: { en: ['AGMARK certification', 'FSSAI Logo', 'Brand reputation'], hi: ['AGMARK प्रमाणन', 'FSSAI लोगो', 'ब्रांड की प्रतिष्ठा'], mr: ['AGMARK प्रमाणपत्र', 'FSSAI लोगो', 'ब्रँडची प्रतिष्ठा'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Edible Oil', hi: 'खाद्य तेल', mr: 'खाद्यतेल' },
+                aliases: ['tel', 'cooking oil', 'mustard oil', 'sunflower oil', 'soyabean oil'],
+                category: { en: 'Fats/Oils', hi: 'वसा/तेल', mr: 'स्निग्ध पदार्थ/तेल' },
+                concerns: { en: 'Argemone oil, Castor oil, Mineral oil', hi: 'आर्गेमोन तेल, अरंडी का तेल, खनिज तेल', mr: 'आर्गेमोन तेल, एरंडेल तेल, खनिज तेल' },
+                checks: { en: 'Add nitric acid to a sample and shake. A red/brown coloration indicates argemone oil adulteration.', hi: 'नमूने में नाइट्रिक एसिड मिलाएं और हिलाएं। लाल/भूरा रंग आर्गेमोन तेल की मिलावट को इंगित करता है।', mr: 'नमुन्यात नायट्रिक ऍसिड घाला आणि हलवा. लाल/तपकिरी रंग आर्गेमोन तेलाची भेसळ दर्शवितो.' },
+                health: { en: 'Epidemic dropsy, loss of eyesight, and severe gastrointestinal disturbances.', hi: 'एपिडेमिक ड्रॉपसी, आंखों की रोशनी जाना, और गंभीर गैस्ट्रोइंटेस्टाइनल गड़बड़ी।', mr: 'एपिडेमिक ड्रॉपसी, दृष्टी गमावणे, आणि गंभीर गॅस्ट्रोइंटेस्टाइनल समस्या.' },
+                lookFor: { en: ['Sealed packaging', 'AGMARK/FSSAI', 'Clarity of the oil'], hi: ['सील बंद पैकेजिंग', 'AGMARK/FSSAI', 'तेल की स्पष्टता'], mr: ['सीलबंद पॅकेजिंग', 'AGMARK/FSSAI', 'तेलाची स्पष्टता'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Chilli Powder', hi: 'लाल मिर्च पाउडर', mr: 'मिरची पावडर' },
+                aliases: ['mirchi', 'mirch', 'red chilli', 'lal mirch'],
+                category: { en: 'Spices', hi: 'मसाले', mr: 'मसाले' },
+                concerns: { en: 'Brick powder, Sand, Sawdust, Artificial colors (Sudan Red)', hi: 'ईंट का पाउडर, रेत, लकड़ी का बुरादा, कृत्रिम रंग (सूडान रेड)', mr: 'विटेची भुकटी, वाळू, लाकडाचा भुसा, कृत्रिम रंग (सुदान रेड)' },
+                checks: { en: 'Add a teaspoon to a glass of water. Brick powder/sand settles at the bottom quickly. Artificial color leaves a colored streak as it settles.', hi: 'एक गिलास पानी में एक चम्मच डालें। ईंट का पाउडर/रेत जल्दी नीचे बैठ जाता है। कृत्रिम रंग नीचे बैठते समय रंगीन लकीर छोड़ता है।', mr: 'एका ग्लास पाण्यात एक चमचा टाका. विटेची भुकटी/वाळू पटकन तळाशी बसते. कृत्रिम रंग तळाशी बसताना रंगीत रेष सोडतो.' },
+                health: { en: 'Gastrointestinal issues, liver damage, and carcinogenic effects from artificial dyes.', hi: 'गैस्ट्रोइंटेस्टाइनल समस्याएं, लिवर की क्षति, और कृत्रिम रंगों से कैंसरकारी प्रभाव।', mr: 'गॅस्ट्रोइंटेस्टाइनल समस्या, यकृताला हानी, आणि कृत्रिम रंगांमुळे कर्करोगजन्य प्रभाव.' },
+                lookFor: { en: ['FSSAI details', 'Reputed brands', 'Proper ingredient list'], hi: ['FSSAI विवरण', 'प्रतिष्ठित ब्रांड', 'उचित सामग्री सूची'], mr: ['FSSAI तपशील', 'प्रतिष्ठित ब्रँड्स', 'योग्य घटक सूची'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Coriander Powder', hi: 'धनिया पाउडर', mr: 'धणे पावडर' },
+                aliases: ['dhaniya', 'dhania'],
+                category: { en: 'Spices', hi: 'मसाले', mr: 'मसाले' },
+                concerns: { en: 'Sawdust, Husk, Dung powder', hi: 'लकड़ी का बुरादा, भूसी, गोबर का पाउडर', mr: 'लाकडाचा भुसा, भुसा (Husk), शेणाची पावडर' },
+                checks: { en: 'Sprinkle some on water. Sawdust or husk will float on the surface, while the pure powder sinks slowly.', hi: 'पानी पर कुछ छिड़कें। लकड़ी का बुरादा या भूसी सतह पर तैरने लगेगी, जबकि शुद्ध पाउडर धीरे-धीरे डूब जाता है।', mr: 'पाण्यावर थोडे शिंपडा. लाकडाचा भुसा किंवा भुसा पृष्ठभागावर तरंगेल, तर शुद्ध पावडर हळूहळू बुडेल.' },
+                health: { en: 'Digestive issues, food poisoning, and intestinal blockages.', hi: 'पाचन संबंधी समस्याएं, फूड पॉइजनिंग, और आंतों में रुकावट।', mr: 'पचन समस्या, फूड पॉयझनिंग, आणि आतड्यांमध्ये अडथळा.' },
+                lookFor: { en: ['Sealed packets', 'FSSAI License', 'Manufacturing date'], hi: ['सील बंद पैकेट', 'FSSAI लाइसेंस', 'निर्माण तिथि'], mr: ['सीलबंद पाकिटे', 'FSSAI परवाना', 'उत्पादन तारीख'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Rice', hi: 'चावल', mr: 'तांदूळ' },
+                aliases: ['chawal', 'bhat'],
+                category: { en: 'Grains', hi: 'अनाज', mr: 'धान्य' },
+                concerns: { en: 'Plastic rice, Marble stones, Urea', hi: 'प्लास्टिक के चावल, संगमरमर के पत्थर, यूरिया', mr: 'प्लास्टिक तांदूळ, संगमरवरी खडे, युरिया' },
+                checks: { en: 'Drop a spoonful of rice into hot oil. Plastic rice will melt or stick together. You can also observe water after soaking; if there is a chemical smell, it may be urea.', hi: 'गर्म तेल में एक चम्मच चावल डालें। प्लास्टिक के चावल पिघल जाएंगे या आपस में चिपक जाएंगे। आप भिगोने के बाद पानी भी देख सकते हैं; अगर रासायनिक गंध है, तो यह यूरिया हो सकता है।', mr: 'गरम तेलात एक चमचा तांदूळ टाका. प्लास्टिक तांदूळ वितळेल किंवा एकमेकांना चिकटेल. तुम्ही भिजवल्यानंतरचे पाणी देखील तपासू शकता; जर रासायनिक वास येत असेल तर तो युरिया असू शकतो.' },
+                health: { en: 'Severe digestive problems, hormonal imbalances, and potential toxicity.', hi: 'पाचन की गंभीर समस्याएं, हार्मोनल असंतुलन, और संभावित विषाक्तता।', mr: 'पचनाच्या गंभीर समस्या, हार्मोनल असंतुलन, आणि संभाव्य विषबाधा.' },
+                lookFor: { en: ['FSSAI details', 'Uniform grain size', 'Absence of visible stones or dust'], hi: ['FSSAI विवरण', 'समान अनाज का आकार', 'दिखाई देने वाले पत्थरों या धूल की अनुपस्थिति'], mr: ['FSSAI तपशील', 'धान्याचा समान आकार', 'दिसणारे खडे किंवा धूळ नसणे'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Wheat Flour', hi: 'गेहूं का आटा', mr: 'गव्हाचे पीठ (कणीक)' },
+                aliases: ['atta', 'kanik', 'gehu', 'gehun'],
+                category: { en: 'Grains', hi: 'अनाज', mr: 'धान्य' },
+                concerns: { en: 'Chalk powder, Boric powder, Maida, Cassava flour', hi: 'चाक पाउडर, बोरिक पाउडर, मैदा, कसावा का आटा', mr: 'खडूची पावडर, बोरिक पावडर, मैदा, कसावा पीठ' },
+                checks: { en: 'Add some lemon juice/HCl to the flour. If bubbles/effervescence appear, chalk powder (calcium carbonate) is present.', hi: 'आटे में थोड़ा नींबू का रस/HCl मिलाएं। यदि बुलबुले/उफान दिखाई देते हैं, तो चाक पाउडर (कैल्शियम कार्बोनेट) मौजूद है।', mr: 'पिठात थोडा लिंबाचा रस/HCl घाला. जर बुडबुडे/फेस आला तर खडूची पावडर (कॅल्शियम कार्बोनेट) आहे.' },
+                health: { en: 'Stomach irritation, liver and kidney damage, and malabsorption of nutrients.', hi: 'पेट में जलन, लिवर और गुर्दे की क्षति, और पोषक तत्वों का खराब अवशोषण।', mr: 'पोटात जळजळ, यकृत आणि किडनीचे नुकसान, आणि पोषक तत्वांचे अयोग्य शोषण.' },
+                lookFor: { en: ['FSSAI mark', 'Expiry date', 'Reputed brands'], hi: ['FSSAI मार्क', 'समाप्ति तिथि', 'प्रतिष्ठित ब्रांड'], mr: ['FSSAI मार्क', 'समाप्ती तारीख', 'प्रतिष्ठित ब्रँड्स'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Sugar', hi: 'चीनी', mr: 'साखर' },
+                aliases: ['chini', 'shakkar', 'sakhar'],
+                category: { en: 'Sweets', hi: 'मिठाई', mr: 'गोड पदार्थ' },
+                concerns: { en: 'Chalk powder, Urea, Washing soda', hi: 'चाक पाउडर, यूरिया, वाशिंग सोडा', mr: 'खडूची पावडर, युरिया, वॉशिंग सोडा' },
+                checks: { en: 'Dissolve in a glass of water. Chalk powder will settle at the bottom. Washing soda can be detected by adding a few drops of HCl which will cause effervescence.', hi: 'एक गिलास पानी में घोलें। चाक पाउडर नीचे बैठ जाएगा। वाशिंग सोडा का पता HCl की कुछ बूंदें डालकर लगाया जा सकता है जिससे उफान आएगा।', mr: 'एका ग्लास पाण्यात विरघळवा. खडूची पावडर तळाशी बसेल. वॉशिंग सोडा शोधण्यासाठी HCl चे काही थेंब टाका, ज्यामुळे फेस येईल.' },
+                health: { en: 'Digestive tract damage, kidney issues, and severe stomach pain.', hi: 'पाचन तंत्र को नुकसान, गुर्दे की समस्याएं, और पेट में गंभीर दर्द।', mr: 'पचनसंस्थेचे नुकसान, किडनीच्या समस्या, आणि पोटात तीव्र वेदना.' },
+                lookFor: { en: ['Clean, transparent crystals', 'FSSAI License', 'Moisture-free packaging'], hi: ['साफ, पारदर्शी क्रिस्टल', 'FSSAI लाइसेंस', 'नमी-मुक्त पैकेजिंग'], mr: ['स्वच्छ, पारदर्शक स्फटिक', 'FSSAI परवाना', 'ओलावा-मुक्त पॅकेजिंग'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Curd', hi: 'दही', mr: 'दही' },
+                aliases: ['dahi', 'yogurt', 'yoghurt'],
+                category: { en: 'Dairy', hi: 'डेयरी', mr: 'डेअरी' },
+                concerns: { en: 'Vanaspati, Starch, Gelatin', hi: 'वनस्पति, स्टार्च, जिलेटिन', mr: 'वनस्पती तूप, स्टार्च, जिलेटिन' },
+                checks: { en: 'Add a few drops of iodine solution to a small sample. If it turns blue/black, starch has been added to thicken it.', hi: 'छोटे नमूने में आयोडीन समाधान की कुछ बूंदें डालें। यदि यह नीला/काला हो जाता है, तो इसे गाढ़ा करने के लिए स्टार्च मिलाया गया है।', mr: 'लहान नमुन्यात आयोडीन द्रावणाचे काही थेंब टाका. जर ते निळे/काळे झाले, तर घट्ट करण्यासाठी स्टार्च मिसळला आहे.' },
+                health: { en: 'Digestive discomfort, lack of probiotic benefits, and potential cholesterol increases if vanaspati is used.', hi: 'पाचन संबंधी परेशानी, प्रोबायोटिक लाभों की कमी, और वनस्पति के उपयोग से कोलेस्ट्रॉल बढ़ने की संभावना।', mr: 'पचनाचा त्रास, प्रोबायोटिक फायद्यांचा अभाव, आणि वनस्पती तूप वापरल्यास कोलेस्ट्रॉल वाढण्याची शक्यता.' },
+                lookFor: { en: ['FSSAI mark', 'Use-by date', 'Proper refrigeration in store'], hi: ['FSSAI मार्क', 'उपयोग की अंतिम तिथि', 'स्टोर में उचित प्रशीतन (रेफ्रिजरेशन)'], mr: ['FSSAI मार्क', 'वापरण्याची अंतिम तारीख', 'दुकानात योग्य रेफ्रिजरेशन'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Tea Leaves', hi: 'चाय की पत्ती', mr: 'चहाची पाने (चहापत्ती)' },
+                aliases: ['chai', 'tea powder', 'chaha'],
+                category: { en: 'Beverages', hi: 'पेय', mr: 'पेये' },
+                concerns: { en: 'Exhausted tea leaves, Artificial color, Iron filings', hi: 'इस्तेमाल की गई चाय की पत्ती, कृत्रिम रंग, लोहे का बुरादा', mr: 'वापरलेली चहाची पाने, कृत्रिम रंग, लोखंडाचा भुसा' },
+                checks: { en: 'Move a magnet through the tea powder to check for iron filings. Rub leaves on a moist filter paper; artificial color will leave a stain instantly.', hi: 'लोहे के बुरादे की जांच के लिए चाय पाउडर के माध्यम से एक चुंबक घुमाएं। नम फिल्टर पेपर पर पत्तियों को रगड़ें; कृत्रिम रंग तुरंत दाग छोड़ देगा।', mr: 'लोखंडाचा भुसा तपासण्यासाठी चहापत्तीमधून चुंबक फिरवा. ओलसर फिल्टर पेपरवर पाने घासा; कृत्रिम रंग लगेच डाग सोडेल.' },
+                health: { en: 'Liver damage, intestinal disorders, and heavy metal toxicity.', hi: 'लिवर की क्षति, आंतों के विकार, और भारी धातु विषाक्तता (हेवी मेटल टॉक्सिसिटी)।', mr: 'यकृताचे नुकसान, आतड्यांसंबंधी विकार, आणि जड धातूंची विषबाधा (हेवी मेटल टॉक्सिसिटी).' },
+                lookFor: { en: ['FSSAI Logo', 'AGMARK', 'Sealed standard packaging'], hi: ['FSSAI लोगो', 'AGMARK', 'सील बंद मानक पैकेजिंग'], mr: ['FSSAI लोगो', 'AGMARK', 'सीलबंद प्रमाणित पॅकेजिंग'] },
+                videoId: ''
+            },
+            {
+                name: { en: 'Coffee Powder', hi: 'कॉफी पाउडर', mr: 'कॉफी पावडर' },
+                aliases: ['kafi', 'coffee'],
+                category: { en: 'Beverages', hi: 'पेय', mr: 'पेये' },
+                concerns: { en: 'Chicory, Roasted date/tamarind seeds, Clay', hi: 'चिकोरी, भुने हुए खजूर/इमली के बीज, मिट्टी', mr: 'चिकोरी, भाजलेल्या खजूर/चिंचेच्या बिया, माती' },
+                checks: { en: 'Gently sprinkle coffee powder on water. Pure coffee floats initially, while chicory starts to sink rapidly, leaving a brownish-red trail.', hi: 'कॉफी पाउडर को धीरे से पानी पर छिड़कें। शुद्ध कॉफी शुरू में तैरती है, जबकि चिकोरी तेजी से डूबने लगती है, जिससे भूरा-लाल निशान छूट जाता है।', mr: 'पाण्यावर कॉफी पावडर हलकेच शिंपडा. शुद्ध कॉफी सुरुवातीला तरंगते, तर चिकोरी वेगाने बुडू लागते आणि तपकिरी-लाल रेष सोडते.' },
+                health: { en: 'Diarrhea, stomach disorders, and joint pains.', hi: 'दस्त, पेट की बीमारियां, और जोड़ों का दर्द।', mr: 'अतिसार, पोटाचे आजार, आणि सांधेदुखी.' },
+                lookFor: { en: ['Ingredient list (percentage of chicory if added)', 'FSSAI License', 'Reputed brands'], hi: ['सामग्री सूची (यदि जोड़ा गया है तो चिकोरी का प्रतिशत)', 'FSSAI लाइसेंस', 'प्रतिष्ठित ब्रांड'], mr: ['घटक सूची (चिकोरी असल्यास त्याची टक्केवारी)', 'FSSAI परवाना', 'प्रतिष्ठित ब्रँड्स'] },
+                videoId: ''
+            }
+        ];
+
+        const questions = [
+            { 
+                q: { en: "What is food adulteration?", hi: "खाद्य मिलावट क्या है?", mr: "अन्नातील भेसळ म्हणजे काय?" }, 
+                options: { 
+                    en: ["Improving food quality", "Adding/substituting unauthorized substances", "Refrigerating food"], 
+                    hi: ["भोजन की गुणवत्ता में सुधार", "अनधिकृत पदार्थों को जोड़ना/बदलना", "भोजन को फ्रिज में रखना"], 
+                    mr: ["अन्नाची गुणवत्ता सुधारणे", "अनधिकृत पदार्थ जोडणे/बदलणे", "अन्न फ्रीजमध्ये ठेवणे"] 
+                }, 
+                correct: 1, 
+                explanation: { en: "Food adulteration means adding inferior or harmful substances to food for financial gain.", hi: "खाद्य मिलावट का अर्थ है वित्तीय लाभ के लिए भोजन में घटिया या हानिकारक पदार्थ मिलाना।", mr: "अन्नातील भेसळ म्हणजे आर्थिक फायद्यासाठी अन्नामध्ये निकृष्ट किंवा हानिकारक पदार्थ मिसळणे." } 
+            },
+            { 
+                q: { en: "Can all food adulteration be detected at home?", hi: "क्या घर पर सभी खाद्य मिलावट का पता लगाया जा सकता है?", mr: "घरी अन्नातील सर्व भेसळ ओळखता येते का?" }, 
+                options: { 
+                    en: ["Yes, easily", "No, some require laboratory testing", "Yes, by tasting it"], 
+                    hi: ["हाँ, आसानी से", "नहीं, कुछ के लिए प्रयोगशाला परीक्षण की आवश्यकता होती है", "हाँ, इसे चखकर"], 
+                    mr: ["होय, सहजपणे", "नाही, काहींसाठी प्रयोगशाळेतील चाचणी आवश्यक असते", "होय, चव घेऊन"] 
+                }, 
+                correct: 1, 
+                explanation: { en: "Home tests are only preliminary awareness checks and cannot replace laboratory testing.", hi: "घरेलू परीक्षण केवल प्रारंभिक जागरूकता जांच हैं और प्रयोगशाला परीक्षण की जगह नहीं ले सकते।", mr: "घरगुती चाचण्या या केवळ प्राथमिक जागरूकतेसाठी असतात आणि त्या प्रयोगशाळेतील चाचणीला पर्याय ठरू शकत नाहीत." } 
+            },
+            { 
+                q: { en: "What happens if you put a drop of pure milk on a polished slanted surface?", hi: "यदि आप एक पॉलिश की गई तिरछी सतह पर शुद्ध दूध की एक बूंद डालते हैं तो क्या होता है?", mr: "पॉलिश केलेल्या तिरप्या पृष्ठभागावर शुद्ध दुधाचा एक थेंब टाकल्यास काय होते?" }, 
+                options: { 
+                    en: ["It flows immediately without a mark", "It leaves a white trail as it flows slowly", "It turns slightly blue"], 
+                    hi: ["यह बिना निशान छोड़े तुरंत बह जाता है", "यह धीरे-धीरे बहते हुए सफेद निशान छोड़ता है", "यह थोड़ा नीला हो जाता है"], 
+                    mr: ["तो कोणतीही खूण न सोडता लगेच वाहून जातो", "तो हळूहळू वाहताना पांढरी खूण सोडतो", "तो थोडा निळा होतो"] 
+                }, 
+                correct: 1, 
+                explanation: { en: "Pure milk leaves a white trail, whereas milk adulterated with water flows quickly without leaving a mark.", hi: "शुद्ध दूध एक सफेद निशान छोड़ता है, जबकि पानी मिला हुआ दूध बिना निशान छोड़े जल्दी से बह जाता है।", mr: "शुद्ध दूध पांढरी खूण सोडते, तर पाणी मिसळलेले दूध खूण न सोडता वेगाने वाहून जाते." } 
+            },
+            { 
+                q: { en: "Which chemical is commonly used to artificially color turmeric powder?", hi: "हल्दी पाउडर को कृत्रिम रूप से रंगने के लिए आमतौर पर किस रसायन का उपयोग किया जाता है?", mr: "हळद पावडरला कृत्रिम रंग देण्यासाठी सामान्यतः कोणते रसायन वापरले जाते?" }, 
+                options: { 
+                    en: ["Metanil Yellow", "Sudan Red", "Calcium Carbonate"], 
+                    hi: ["मेटानिल येलो", "सूडान रेड", "कैल्शियम कार्बोनेट"], 
+                    mr: ["मेटानिल येलो", "सुदान रेड", "कॅल्शियम कार्बोनेट"] 
+                }, 
+                correct: 0, 
+                explanation: { en: "Metanil Yellow is often used to give turmeric a bright yellow color, but it is highly carcinogenic.", hi: "हल्दी को चमकीला पीला रंग देने के लिए अक्सर मेटानिल येलो का उपयोग किया जाता है, लेकिन यह अत्यधिक कैंसरकारी है।", mr: "हळदीला गडद पिवळा रंग देण्यासाठी अनेकदा मेटानिल येलो वापरले जाते, परंतु ते अत्यंत कर्करोगजन्य आहे." } 
+            },
+            { 
+                q: { en: "How can you test for starch adulteration in paneer or curd at home?", hi: "आप घर पर पनीर या दही में स्टार्च की मिलावट का परीक्षण कैसे कर सकते हैं?", mr: "तुम्ही घरी पनीर किंवा दह्यामध्ये स्टार्चच्या भेसळीची चाचणी कशी करू शकता?" }, 
+                options: { 
+                    en: ["Add a few drops of iodine solution", "Burn a small piece", "Mix it with lemon juice"], 
+                    hi: ["आयोडीन समाधान की कुछ बूंदें डालें", "एक छोटा टुकड़ा जलाएं", "इसे नींबू के रस के साथ मिलाएं"], 
+                    mr: ["आयोडीन द्रावणाचे काही थेंब टाका", "एक लहान तुकडा जाळा", "त्यात लिंबाचा रस मिसळा"] 
+                }, 
+                correct: 0, 
+                explanation: { en: "Adding iodine solution to starch turns it a blue-black color, making it an effective preliminary test.", hi: "स्टार्च में आयोडीन समाधान मिलाने से यह नीला-काला हो जाता है, जिससे यह एक प्रभावी प्रारंभिक परीक्षण बन जाता है।", mr: "स्टार्चमध्ये आयोडीन द्रावण मिसळल्याने त्याचा रंग निळा-काळा होतो, ज्यामुळे ही एक प्रभावी प्राथमिक चाचणी ठरते." } 
+            },
+            { 
+                q: { en: "When checking a packaged food product, what is the most important certification to look for in India?", hi: "पैक किए गए खाद्य उत्पाद की जांच करते समय, भारत में देखने के लिए सबसे महत्वपूर्ण प्रमाणन क्या है?", mr: "पॅक केलेले अन्न उत्पादन तपासताना, भारतात कोणते सर्वात महत्त्वाचे प्रमाणपत्र पाहिले पाहिजे?" }, 
+                options: { 
+                    en: ["FDA Approval", "FSSAI Logo and License Number", "ISO 9001"], 
+                    hi: ["FDA अनुमोदन", "FSSAI लोगो और लाइसेंस नंबर", "ISO 9001"], 
+                    mr: ["FDA मान्यता", "FSSAI लोगो आणि परवाना क्रमांक", "ISO 9001"] 
+                }, 
+                correct: 1, 
+                explanation: { en: "The FSSAI logo and 14-digit license number are mandatory for packaged food.", hi: "पैक किए गए भोजन के लिए FSSAI लोगो और 14-अंकीय लाइसेंस नंबर अनिवार्य है।", mr: "पॅक केलेल्या अन्नासाठी FSSAI लोगो आणि १४-अंकी परवाना क्रमांक अनिवार्य आहे." } 
+            },
+            { 
+                q: { en: "If you suspect a food product is adulterated, what should you do with the remaining product?", hi: "यदि आपको संदेह है कि किसी खाद्य उत्पाद में मिलावट है, तो आपको शेष उत्पाद का क्या करना चाहिए?", mr: "जर तुम्हाला एखाद्या अन्न उत्पादनात भेसळ असल्याचा संशय असेल, तर तुम्ही उरलेल्या उत्पादनाचे काय करावे?" }, 
+                options: { 
+                    en: ["Throw it away immediately", "Preserve the product, packaging, and the purchase bill", "Feed it to animals"], 
+                    hi: ["इसे तुरंत फेंक दें", "उत्पाद, पैकेजिंग और खरीद बिल को सुरक्षित रखें", "इसे जानवरों को खिलाएं"], 
+                    mr: ["ते लगेच फेकून द्या", "उत्पादन, पॅकेजिंग आणि खरेदीचे बिल जपून ठेवा", "ते प्राण्यांना खाऊ घाला"] 
+                }, 
+                correct: 1, 
+                explanation: { en: "You must preserve the physical evidence along with the bill to file a valid official complaint.", hi: "वैध आधिकारिक शिकायत दर्ज करने के लिए आपको बिल के साथ भौतिक साक्ष्य को सुरक्षित रखना चाहिए।", mr: "वैध अधिकृत तक्रार दाखल करण्यासाठी तुम्हाला बिलासोबत भौतिक पुरावे जतन करणे आवश्यक आहे." } 
+            },
+            { 
+                q: { en: "Where is the official channel to file a food adulteration complaint in India?", hi: "भारत में खाद्य मिलावट की शिकायत दर्ज करने का आधिकारिक चैनल कहां है?", mr: "भारतात अन्नातील भेसळीची तक्रार नोंदवण्यासाठी अधिकृत चॅनेल कुठे आहे?" }, 
+                options: { 
+                    en: ["Local Police Station", "Food Safety Connect Portal (FoSCoS)", "Consumer Court directly"], 
+                    hi: ["स्थानीय पुलिस स्टेशन", "खाद्य सुरक्षा कनेक्ट पोर्टल (FoSCoS)", "सीधे उपभोक्ता अदालत"], 
+                    mr: ["स्थानिक पोलीस स्टेशन", "फूड सेफ्टी कनेक्ट पोर्टल (FoSCoS)", "थेट ग्राहक न्यायालय"] 
+                }, 
+                correct: 1, 
+                explanation: { en: "The official mechanism is the FSSAI Food Safety Connect portal, which tracks and routes grievances to local safety officers.", hi: "आधिकारिक तंत्र FSSAI खाद्य सुरक्षा कनेक्ट पोर्टल है, जो शिकायतों को ट्रैक करता है और स्थानीय सुरक्षा अधिकारियों को भेजता है।", mr: "अधिकृत यंत्रणा FSSAI फूड सेफ्टी कनेक्ट पोर्टल आहे, जे तक्रारींचा मागोवा घेते आणि स्थानिक सुरक्षा अधिकाऱ्यांकडे पाठवते." } 
+            },
+            { 
+                q: { en: "Which of the following is a common adulterant in black pepper?", hi: "काली मिर्च में निम्नलिखित में से कौन सा एक सामान्य मिलावटी पदार्थ है?", mr: "काळ्या मिरीमध्ये खालीलपैकी कोणती सामान्य भेसळ असते?" }, 
+                options: { 
+                    en: ["Dried papaya seeds", "Mustard seeds", "Chicory"], 
+                    hi: ["सूखे पपीते के बीज", "सरसों के बीज", "चिकोरी"], 
+                    mr: ["वाळलेल्या पपईच्या बिया", "मोहरी", "चिकोरी"] 
+                }, 
+                correct: 0, 
+                explanation: { en: "Dried papaya seeds look very similar to black pepper and are often mixed in to increase weight.", hi: "सूखे पपीते के बीज काली मिर्च के समान दिखते हैं और अक्सर वजन बढ़ाने के लिए मिलाए जाते हैं।", mr: "वाळलेल्या पपईच्या बिया काळ्या मिरीसारख्याच दिसतात आणि वजन वाढवण्यासाठी त्या अनेकदा मिसळल्या जातात." } 
+            },
+            { 
+                q: { en: "To detect if honey is pure, you can use the 'Cotton Wick Test'. What happens if the honey is pure?", hi: "शहद शुद्ध है या नहीं, इसका पता लगाने के लिए आप 'कॉटन विक टेस्ट' का उपयोग कर सकते हैं। यदि शहद शुद्ध है तो क्या होता है?", mr: "मध शुद्ध आहे की नाही हे शोधण्यासाठी तुम्ही 'कापसाच्या वातीची चाचणी' वापरू शकता. मध शुद्ध असल्यास काय होते?" }, 
+                options: { 
+                    en: ["The wick cracks and pops", "The wick refuses to burn", "The wick burns readily"], 
+                    hi: ["बत्ती चटकती है", "बत्ती जलने से इंकार करती है", "बत्ती आसानी से जल जाती है"], 
+                    mr: ["वात तडतडते", "वात जळत नाही", "वात सहज जळते"] 
+                }, 
+                correct: 2, 
+                explanation: { en: "Pure honey will burn readily. If water or sugar syrup has been added, the moisture will cause it to crackle or prevent it from burning.", hi: "शुद्ध शहद आसानी से जल जाएगा। यदि पानी या चीनी की चाशनी मिलाई गई है, तो नमी के कारण यह चटकेगा या जलने से रुकेगा।", mr: "शुद्ध मध सहज जळते. पाणी किंवा साखरेचा पाक मिसळला असल्यास, ओलाव्यामुळे ते तडतडेल किंवा जळणार नाही." } 
+            }
+        ];
+        
+        let currentQ = 0;
+
+        function applyLanguage(lang) {
+            stopTTS();
+            currentLang = lang;
+            
+            // Sync dropdowns
+            document.getElementById('lang-select-desktop').value = lang;
+            document.getElementById('lang-select-mobile').value = lang;
+
+            // Update static i18n texts
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (staticTranslations[lang][key]) {
+                    el.innerText = staticTranslations[lang][key];
+                }
+            });
+
+            // Update specific inputs placeholders and titles
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.placeholder = staticTranslations[lang]['searchPlaceholder'];
+            
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (staticTranslations[lang][key]) {
+                    el.setAttribute('title', staticTranslations[lang][key]);
+                    el.setAttribute('aria-label', staticTranslations[lang][key]);
+                }
+            });
+
+            // Re-render views if they are active
+            const searchView = document.getElementById('view-search');
+            if (!searchView.classList.contains('hidden-view')) {
+                if (currentSearchResult) {
+                    renderActiveSearchResult(currentSearchResult, currentIsFuzzy);
+                } else {
+                    handleSearch({ preventDefault: () => {} }, true);
+                }
+            }
+
+            const quizView = document.getElementById('view-quiz');
+            if (!quizView.classList.contains('hidden-view')) {
+                renderQuiz(true);
+            }
+        }
+
+        // Navigation Logic
+        function navigate(viewId) {
+            stopTTS();
+            if (viewId === 'quiz') {
+                currentQ = 0;
+                quizScore = 0;
+                isQuizAnswered = false;
+                currentSelectedAnswer = null;
+                renderQuiz();
+            }
+
+            document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden-view'));
+            document.getElementById('view-' + viewId).classList.remove('hidden-view');
+            
+            const menu = document.getElementById('mobile-menu');
+            if (!menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+                lucide.createIcons();
+            }
+            
+            document.querySelectorAll('nav button[onclick^="navigate"]').forEach(btn => {
+                const target = btn.getAttribute('onclick');
+                if (target.includes('complaint')) return; 
+
+                const isMobile = btn.classList.contains('block');
+                if (target.includes(`'${viewId}'`)) {
+                    btn.classList.add('text-primary');
+                    if (isMobile) { btn.classList.add('bg-gray-100', 'font-bold'); btn.classList.remove('text-gray-700'); } 
+                    else { btn.classList.add('underline', 'decoration-2', 'underline-offset-8'); btn.classList.remove('text-gray-600'); }
+                } else {
+                    btn.classList.remove('text-primary', 'bg-gray-100', 'font-bold', 'underline', 'decoration-2', 'underline-offset-8');
+                    if (isMobile) { btn.classList.add('text-gray-700'); } 
+                    else { btn.classList.add('text-gray-600'); }
+                }
+            });
+            window.scrollTo(0, 0);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+            lucide.createIcons();
+        }
+
+        // Search Logic
+        function handleSearch(event, isLangSwitch = false) {
+            if (event) event.preventDefault();
+            stopTTS();
+            
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const container = document.getElementById('searchResultContainer');
+            container.classList.remove('hidden');
+
+            if (!query) {
+                currentSearchResult = null;
+                currentIsFuzzy = false;
+                container.innerHTML = `
+                    <div class="text-center bg-white p-8 rounded-xl shadow-sm border border-gray-100 no-print">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">${staticTranslations[currentLang].emptySearchTitle}</h3>
+                        <p class="text-gray-600">${staticTranslations[currentLang].emptySearchDesc}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 1. Exact Match Pass
+            let result = productDatabase.find(p => 
+                p.name.en.toLowerCase().includes(query) || 
+                p.name.hi.toLowerCase().includes(query) || 
+                p.name.mr.toLowerCase().includes(query) ||
+                (p.aliases && p.aliases.some(alias => alias.toLowerCase().includes(query)))
+            );
+
+            let isFuzzyMatch = false;
+
+            // 2. Fuzzy Match Pass
+            if (!result) {
+                let bestMatch = null;
+                let minDistance = Infinity;
+                const threshold = query.length <= 4 ? 1 : (query.length <= 7 ? 2 : 3);
+
+                for (const p of productDatabase) {
+                    const phrasesToTest = [
+                        p.name.en.toLowerCase(),
+                        p.name.hi.toLowerCase(),
+                        p.name.mr.toLowerCase(),
+                        ...(p.aliases || []).map(a => a.toLowerCase())
+                    ];
+
+                    for (const phrase of phrasesToTest) {
+                        let dist = getEditDistance(query, phrase);
+                        if (dist < minDistance) { minDistance = dist; bestMatch = p; }
+                        
+                        const words = phrase.split(' ');
+                        for (const w of words) {
+                            if (w.length > 2) {
+                                let wordDist = getEditDistance(query, w);
+                                if (wordDist < minDistance) { minDistance = wordDist; bestMatch = p; }
+                            }
+                        }
+                    }
+                }
+
+                if (bestMatch && minDistance <= threshold) {
+                    result = bestMatch;
+                    isFuzzyMatch = true;
+                }
+            }
+
+            if (result) {
+                currentSearchResult = result;
+                currentIsFuzzy = isFuzzyMatch;
+                renderActiveSearchResult(result, isFuzzyMatch);
+            } else {
+                currentSearchResult = null;
+                currentIsFuzzy = false;
+                const suggestionChips = productDatabase.map((p, index) => 
+                    `<button type="button" data-index="${index}" class="suggestion-chip m-1 inline-block bg-gray-50 hover:bg-primary hover:text-white text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition shadow-sm border border-gray-200">${p.name[currentLang]}</button>`
+                ).join('');
+                
+                container.innerHTML = `
+                    <div class="text-center bg-white p-8 rounded-xl shadow-sm border border-gray-100 no-print">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">${staticTranslations[currentLang].notFoundTitle}</h3>
+                        <p class="text-gray-600 mb-6">${staticTranslations[currentLang].notFoundDesc}</p>
+                        <div class="flex flex-wrap justify-center gap-2">${suggestionChips}</div>
+                    </div>
+                `;
+
+                container.querySelectorAll('.suggestion-chip').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = this.getAttribute('data-index');
+                        document.getElementById('searchInput').value = productDatabase[idx].name[currentLang];
+                        handleSearch();
+                    });
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function renderActiveSearchResult(result, isFuzzyMatch = false) {
+            const container = document.getElementById('searchResultContainer');
+            let listHtml = result.lookFor[currentLang].map(item => `<li class="flex items-center text-gray-700"><i data-lucide="check" class="w-4 h-4 text-primary mr-2"></i> ${item}</li>`).join('');
+            const t = staticTranslations[currentLang];
+            
+            let fuzzyNoteHtml = '';
+            if (isFuzzyMatch) {
+                fuzzyNoteHtml = `
+                    <div class="mb-4 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm border border-blue-100 flex items-center shadow-sm no-print">
+                        <i data-lucide="info" class="w-5 h-5 mr-2 shrink-0"></i>
+                        <span>${t.lblClosestMatch.replace('{P}', result.name[currentLang])}</span>
+                    </div>
+                `;
+            }
+
+            let videoHtml = '';
+            if (result.videoId) {
+                videoHtml = `
+                    <div class="aspect-video w-full rounded-lg overflow-hidden bg-gray-100">
+                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/${result.videoId}" title="${t.lblVideoTitle}" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">${t.lblVideoDisclaimer}</p>
+                `;
+            } else {
+                videoHtml = `
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+                        <p class="text-sm text-gray-500 italic">${t.lblVideoComingSoon}</p>
+                    </div>
+                `;
+            }
+
+            let shareMsg = t.shareProductMsg.replace('{P}', result.name[currentLang]).replace('{C}', result.concerns[currentLang]).replace('{L}', window.location.href);
+            let waUrl = `https://wa.me/?text=${encodeURIComponent(shareMsg)}`;
+            
+            const shieldSvg = `<svg class="w-8 h-8 mr-2 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>`;
+
+            let ttsBtnHtml = '';
+            if (ttsSupported) {
+                ttsBtnHtml = `
+                    <button onclick="toggleTTS()" class="inline-flex items-center text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-full font-medium transition border border-purple-200 text-sm shadow-sm">
+                        <i id="tts-btn-icon" data-lucide="${isSpeaking ? 'square' : 'volume-2'}" class="w-4 h-4 mr-1.5"></i>
+                        <span id="tts-btn-text">${isSpeaking ? t.lblStopReading : t.lblReadAloud}</span>
+                    </button>
+                `;
+            }
+
+            container.innerHTML = `
+                ${fuzzyNoteHtml}
+                
+                <div class="print-only mb-6 border-b-2 border-black pb-4 page-break-avoid">
+                    <h1 class="text-3xl font-bold flex items-center">
+                        ${shieldSvg} FoodGuard India
+                    </h1>
+                    <p class="italic text-sm mt-1">${t.footerSlogan}</p>
+                    <p class="text-sm mt-1 text-gray-500">${t.lblPrintedOn}: ${new Date().toLocaleDateString()}</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden page-break-avoid">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4">
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-2xl font-bold text-gray-800">${result.name[currentLang]}</h3>
+                            <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full border">${result.category[currentLang]}</span>
+                        </div>
+                        <div class="flex gap-2 no-print flex-wrap">
+                            ${ttsBtnHtml}
+                            <button onclick="window.print()" class="inline-flex items-center text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full font-medium transition border border-gray-300 text-sm shadow-sm">
+                                <i data-lucide="printer" class="w-4 h-4 mr-1.5"></i>
+                                ${t.btnPrint}
+                            </button>
+                            <a href="${waUrl}" target="_blank" class="inline-flex items-center text-green-700 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-full font-medium transition border border-green-200 text-sm shadow-sm">
+                                <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                ${t.btnShare}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        <div class="page-break-avoid">
+                            <h4 class="font-bold text-warning mb-2">${t.lblConcerns}</h4>
+                            <p class="text-gray-700 bg-orange-50 p-3 rounded-md">${result.concerns[currentLang]}</p>
+                        </div>
+                        
+                        <div class="page-break-avoid">
+                            <h4 class="font-bold text-danger mb-2">${t.lblHealth}</h4>
+                            <p class="text-gray-700 bg-red-50 p-3 rounded-md">${result.health[currentLang]}</p>
+                        </div>
+
+                        <div class="page-break-avoid">
+                            <h4 class="font-bold text-blue-600 mb-2">${t.lblChecks}</h4>
+                            <p class="text-gray-700 bg-blue-50 p-3 rounded-md">${result.checks[currentLang]}</p>
+                        </div>
+
+                        <div class="page-break-avoid">
+                            <h4 class="font-bold text-primary mb-2">${t.lblLookFor}</h4>
+                            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-2 sm:pl-0">${listHtml}</ul>
+                        </div>
+                        
+                        <!-- VIDEO SECTION -->
+                        <div class="no-print">
+                            <h4 class="font-bold text-gray-800 mb-2">${t.lblVideoTitle}</h4>
+                            ${videoHtml}
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-gray-300 page-break-avoid">
+                            <p class="text-sm text-gray-600 italic"><strong>${t.lblNote.split(':')[0]}:</strong> ${t.lblNote.split(':')[1]}</p>
+                        </div>
+                        <div class="pt-4 border-t border-gray-100 no-print">
+                            <button onclick="navigate('complaint')" class="text-danger font-bold hover:underline">${t.lblReport}</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Quiz Logic
+        function renderQuiz(isLangSwitch = false) {
+            const container = document.getElementById('quiz-container');
+            const t = staticTranslations[currentLang];
+            
+            if (currentQ >= questions.length) {
+                let shareMsg = t.shareQuizMsg.replace('{S}', quizScore).replace('{T}', questions.length).replace('{L}', window.location.href);
+                let waUrl = `https://wa.me/?text=${encodeURIComponent(shareMsg)}`;
+
+                container.innerHTML = `
+                    <div class="text-center">
+                        <h2 class="text-3xl font-bold mb-4 text-primary">${t.quizCompleted}</h2>
+                        <p class="text-gray-600 mb-6">${t.quizCompletedSub}</p>
+                        <p class="text-2xl font-black text-gray-800 mb-8">Score: ${quizScore} / ${questions.length}</p>
+                        <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+                            <button onclick="navigate('home')" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-md font-medium hover:bg-gray-300">${t.quizBtnHome}</button>
+                            <button onclick="currentQ = 0; quizScore = 0; isQuizAnswered = false; renderQuiz();" class="bg-primary text-white px-6 py-2 rounded-md font-medium hover:bg-primaryDark">${t.quizBtnRestart}</button>
+                        </div>
+                        <a href="${waUrl}" target="_blank" class="inline-flex items-center text-green-700 bg-green-50 hover:bg-green-100 px-5 py-2.5 rounded-full font-medium transition border border-green-200 shadow-sm">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            ${t.btnShare}
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            const q = questions[currentQ];
+            let optionsHtml = q.options[currentLang].map((opt, idx) => `
+                <button id="quiz-opt-${idx}" onclick="checkAnswer(${idx})" class="w-full text-left p-4 rounded-lg border-2 border-gray-200 hover:border-primary bg-gray-50 hover:bg-white transition mb-3">
+                    ${opt}
+                </button>
+            `).join('');
+
+            let headerText = t.quizQOf.replace('{X}', currentQ + 1).replace('{Y}', questions.length);
+
+            container.innerHTML = `
+                <span class="text-sm font-bold text-primary mb-2 block">${headerText}</span>
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">${q.q[currentLang]}</h2>
+                <div>${optionsHtml}</div>
+                <div id="quiz-result" class="hidden mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p id="quiz-status" class="font-semibold text-gray-900 mb-1"></p>
+                    <p class="text-gray-700 text-sm">${q.explanation[currentLang]}</p>
+                    <button onclick="nextQuestion()" class="mt-4 bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800">${t.quizNextBtn}</button>
+                </div>
+            `;
+
+            if (isLangSwitch && isQuizAnswered && currentSelectedAnswer !== null) {
+                checkAnswer(currentSelectedAnswer, true);
+            }
+        }
+
+        function checkAnswer(selectedIndex, isRestore = false) {
+            const isCorrect = selectedIndex === questions[currentQ].correct;
+            
+            if (!isRestore && !isQuizAnswered && isCorrect) {
+                quizScore++;
+            }
+
+            isQuizAnswered = true;
+            currentSelectedAnswer = selectedIndex;
+            
+            const t = staticTranslations[currentLang];
+            const resultBox = document.getElementById('quiz-result');
+            const statusText = document.getElementById('quiz-status');
+            const correctIndex = questions[currentQ].correct;
+            
+            statusText.innerText = isCorrect ? t.quizCorrect : t.quizIncorrect;
+            resultBox.classList.remove('hidden');
+            
+            const buttons = document.querySelectorAll('#quiz-container button[id^="quiz-opt-"]');
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === correctIndex) {
+                    btn.className = "w-full text-left p-4 rounded-lg border-2 transition mb-3 bg-green-100 border-green-500 text-green-900 font-medium";
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.className = "w-full text-left p-4 rounded-lg border-2 transition mb-3 bg-red-100 border-red-500 text-red-900 font-medium";
+                } else {
+                    btn.className = "w-full text-left p-4 rounded-lg border-2 transition mb-3 border-gray-200 bg-gray-50 opacity-60";
+                }
+            });
+        }
+
+        function nextQuestion() {
+            currentQ++;
+            isQuizAnswered = false;
+            currentSelectedAnswer = null;
+            renderQuiz();
+        }
+
+        // Init
+        applyLanguage('en');
+    </script>
+</body>
+</html>
